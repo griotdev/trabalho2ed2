@@ -7,7 +7,7 @@ TEST_DIR := ../tests
 OBJ_DIR := ../obj
 BIN_DIR := ../bin
 TARGET := $(BIN_DIR)/ted.exe
-TEST_TARGETS := $(BIN_DIR)/test_args.exe $(BIN_DIR)/test_block.exe $(BIN_DIR)/test_geometry.exe
+TEST_TARGETS := $(BIN_DIR)/test_args.exe $(BIN_DIR)/test_block.exe $(BIN_DIR)/test_geometry.exe $(BIN_DIR)/test_file_paths.exe
 
 SOURCES := $(wildcard $(SRC_DIR)/*.c)
 OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
@@ -35,6 +35,7 @@ test: $(TEST_TARGETS)
 	$(BIN_DIR)/test_args.exe
 	$(BIN_DIR)/test_block.exe
 	$(BIN_DIR)/test_geometry.exe
+	$(BIN_DIR)/test_file_paths.exe
 
 $(BIN_DIR)/test_args.exe: $(OBJ_DIR)/test_args.o $(APP_OBJECTS) $(UNITY_OBJECT) | $(BIN_DIR)
 	$(CC) $(TEST_CFLAGS) $(OBJ_DIR)/test_args.o $(APP_OBJECTS) $(UNITY_OBJECT) -o $@
@@ -45,6 +46,9 @@ $(BIN_DIR)/test_block.exe: $(OBJ_DIR)/test_block.o $(APP_OBJECTS) $(UNITY_OBJECT
 $(BIN_DIR)/test_geometry.exe: $(OBJ_DIR)/test_geometry.o $(APP_OBJECTS) $(UNITY_OBJECT) | $(BIN_DIR)
 	$(CC) $(TEST_CFLAGS) $(OBJ_DIR)/test_geometry.o $(APP_OBJECTS) $(UNITY_OBJECT) -o $@
 
+$(BIN_DIR)/test_file_paths.exe: $(OBJ_DIR)/test_file_paths.o $(APP_OBJECTS) $(UNITY_OBJECT) | $(BIN_DIR)
+	$(CC) $(TEST_CFLAGS) $(OBJ_DIR)/test_file_paths.o $(APP_OBJECTS) $(UNITY_OBJECT) -o $@
+
 $(OBJ_DIR)/test_args.o: $(TEST_DIR)/test_args.c | $(OBJ_DIR)
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -52,6 +56,9 @@ $(OBJ_DIR)/test_block.o: $(TEST_DIR)/test_block.c | $(OBJ_DIR)
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/test_geometry.o: $(TEST_DIR)/test_geometry.c | $(OBJ_DIR)
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/test_file_paths.o: $(TEST_DIR)/test_file_paths.c | $(OBJ_DIR)
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
 $(UNITY_OBJECT): $(TEST_DIR)/unity/unity.c | $(OBJ_DIR)
@@ -63,3 +70,4 @@ clean:
 	-del /Q ..\bin\test_args.exe 2>NUL
 	-del /Q ..\bin\test_block.exe 2>NUL
 	-del /Q ..\bin\test_geometry.exe 2>NUL
+	-del /Q ..\bin\test_file_paths.exe 2>NUL
