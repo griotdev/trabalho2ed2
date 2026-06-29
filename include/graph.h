@@ -1,7 +1,7 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-typedef struct Graph Graph;
+typedef void Graph;
 
 Graph *graph_create(void);
 void graph_destroy(Graph *graph);

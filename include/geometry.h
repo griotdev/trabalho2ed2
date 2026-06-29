@@ -1,8 +1,8 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-typedef struct Point Point;
-typedef struct Rect Rect;
+typedef void Point;
+typedef void Rect;
 
 Point *point_create(double x, double y);
 void point_destroy(Point *point);

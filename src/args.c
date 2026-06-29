@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct AppArgs {
+typedef struct {
     char *input_dir;
     char *geo_file;
     char *query_file;
     char *via_file;
     char *output_dir;
     char error[160];
-};
+} AppArgsData;
 
 static char *copy_string(const char *text) {
     char *copy;
@@ -31,7 +31,7 @@ static char *copy_string(const char *text) {
     return copy;
 }
 
-static void free_values(AppArgs *args) {
+static void free_values(AppArgsData *args) {
     free(args->input_dir);
     free(args->geo_file);
     free(args->query_file);
@@ -45,11 +45,11 @@ static void free_values(AppArgs *args) {
     args->output_dir = NULL;
 }
 
-static void set_error(AppArgs *args, const char *message) {
+static void set_error(AppArgsData *args, const char *message) {
     snprintf(args->error, sizeof(args->error), "%s", message);
 }
 
-static int set_value(AppArgs *args, char **field, const char *option, const char *value) {
+static int set_value(AppArgsData *args, char **field, const char *option, const char *value) {
     char message[160];
 
     if (*field != NULL) {
@@ -67,7 +67,7 @@ static int set_value(AppArgs *args, char **field, const char *option, const char
     return 1;
 }
 
-static int read_option_value(AppArgs *args, int argc, char **argv, int *index, const char *option, char **field) {
+static int read_option_value(AppArgsData *args, int argc, char **argv, int *index, const char *option, char **field) {
     if (*index + 1 >= argc) {
         char message[160];
         snprintf(message, sizeof(message), "Parametro sem valor: %s", option);
@@ -80,66 +80,69 @@ static int read_option_value(AppArgs *args, int argc, char **argv, int *index, c
 }
 
 AppArgs *args_create(void) {
-    AppArgs *args = calloc(1, sizeof(AppArgs));
+    AppArgsData *args = calloc(1, sizeof(AppArgsData));
 
     return args;
 }
 
 void args_destroy(AppArgs *args) {
+    AppArgsData *data = args;
+
     if (args == NULL) {
         return;
     }
 
-    free_values(args);
-    free(args);
+    free_values(data);
+    free(data);
 }
 
 int args_parse(AppArgs *args, int argc, char **argv) {
+    AppArgsData *data = args;
     int i;
 
     if (args == NULL) {
         return 0;
     }
 
-    free_values(args);
-    args->error[0] = '\0';
+    free_values(data);
+    data->error[0] = '\0';
 
     for (i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-e") == 0) {
-            if (!read_option_value(args, argc, argv, &i, "-e", &args->input_dir)) {
+            if (!read_option_value(data, argc, argv, &i, "-e", &data->input_dir)) {
                 return 0;
             }
         } else if (strcmp(argv[i], "-f") == 0) {
-            if (!read_option_value(args, argc, argv, &i, "-f", &args->geo_file)) {
+            if (!read_option_value(data, argc, argv, &i, "-f", &data->geo_file)) {
                 return 0;
             }
         } else if (strcmp(argv[i], "-q") == 0) {
-            if (!read_option_value(args, argc, argv, &i, "-q", &args->query_file)) {
+            if (!read_option_value(data, argc, argv, &i, "-q", &data->query_file)) {
                 return 0;
             }
         } else if (strcmp(argv[i], "-v") == 0) {
-            if (!read_option_value(args, argc, argv, &i, "-v", &args->via_file)) {
+            if (!read_option_value(data, argc, argv, &i, "-v", &data->via_file)) {
                 return 0;
             }
         } else if (strcmp(argv[i], "-o") == 0) {
-            if (!read_option_value(args, argc, argv, &i, "-o", &args->output_dir)) {
+            if (!read_option_value(data, argc, argv, &i, "-o", &data->output_dir)) {
                 return 0;
             }
         } else {
             char message[160];
             snprintf(message, sizeof(message), "Parametro desconhecido: %s", argv[i]);
-            set_error(args, message);
+            set_error(data, message);
             return 0;
         }
     }
 
-    if (args->geo_file == NULL) {
-        set_error(args, "Parametro obrigatorio ausente: -f");
+    if (data->geo_file == NULL) {
+        set_error(data, "Parametro obrigatorio ausente: -f");
         return 0;
     }
 
-    if (args->output_dir == NULL) {
-        set_error(args, "Parametro obrigatorio ausente: -o");
+    if (data->output_dir == NULL) {
+        set_error(data, "Parametro obrigatorio ausente: -o");
         return 0;
     }
 
@@ -147,29 +150,41 @@ int args_parse(AppArgs *args, int argc, char **argv) {
 }
 
 const char *args_input_dir(const AppArgs *args) {
-    return args == NULL ? NULL : args->input_dir;
+    const AppArgsData *data = args;
+
+    return data == NULL ? NULL : data->input_dir;
 }
 
 const char *args_geo_file(const AppArgs *args) {
-    return args == NULL ? NULL : args->geo_file;
+    const AppArgsData *data = args;
+
+    return data == NULL ? NULL : data->geo_file;
 }
 
 const char *args_query_file(const AppArgs *args) {
-    return args == NULL ? NULL : args->query_file;
+    const AppArgsData *data = args;
+
+    return data == NULL ? NULL : data->query_file;
 }
 
 const char *args_via_file(const AppArgs *args) {
-    return args == NULL ? NULL : args->via_file;
+    const AppArgsData *data = args;
+
+    return data == NULL ? NULL : data->via_file;
 }
 
 const char *args_output_dir(const AppArgs *args) {
-    return args == NULL ? NULL : args->output_dir;
+    const AppArgsData *data = args;
+
+    return data == NULL ? NULL : data->output_dir;
 }
 
 const char *args_error(const AppArgs *args) {
-    if (args == NULL || args->error[0] == '\0') {
+    const AppArgsData *data = args;
+
+    if (data == NULL || data->error[0] == '\0') {
         return NULL;
     }
 
-    return args->error;
+    return data->error;
 }

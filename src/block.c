@@ -4,13 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Block {
+typedef struct {
     char *cep;
     double x;
     double y;
     double width;
     double height;
-};
+} BlockData;
 
 static char *copy_string(const char *text) {
     char *copy;
@@ -31,13 +31,13 @@ static char *copy_string(const char *text) {
 }
 
 Block *block_create(const char *cep, double x, double y, double width, double height) {
-    Block *block;
+    BlockData *block;
 
     if (cep == NULL || width < 0.0 || height < 0.0) {
         return NULL;
     }
 
-    block = malloc(sizeof(Block));
+    block = malloc(sizeof(BlockData));
     if (block == NULL) {
         return NULL;
     }
@@ -56,38 +56,51 @@ Block *block_create(const char *cep, double x, double y, double width, double he
 }
 
 void block_destroy(Block *block) {
+    BlockData *data = block;
+
     if (block == NULL) {
         return;
     }
 
-    free(block->cep);
-    free(block);
+    free(data->cep);
+    free(data);
 }
 
 const char *block_cep(const Block *block) {
-    return block == NULL ? NULL : block->cep;
+    const BlockData *data = block;
+
+    return data == NULL ? NULL : data->cep;
 }
 
 double block_x(const Block *block) {
-    return block == NULL ? 0.0 : block->x;
+    const BlockData *data = block;
+
+    return data == NULL ? 0.0 : data->x;
 }
 
 double block_y(const Block *block) {
-    return block == NULL ? 0.0 : block->y;
+    const BlockData *data = block;
+
+    return data == NULL ? 0.0 : data->y;
 }
 
 double block_width(const Block *block) {
-    return block == NULL ? 0.0 : block->width;
+    const BlockData *data = block;
+
+    return data == NULL ? 0.0 : data->width;
 }
 
 double block_height(const Block *block) {
-    return block == NULL ? 0.0 : block->height;
+    const BlockData *data = block;
+
+    return data == NULL ? 0.0 : data->height;
 }
 
 int block_address_point(const Block *block, char face, double number, double *x, double *y) {
+    const BlockData *data = block;
     char normalized_face;
 
-    if (block == NULL || x == NULL || y == NULL || number < 0.0) {
+    if (data == NULL || x == NULL || y == NULL || number < 0.0) {
         return 0;
     }
 
@@ -95,20 +108,20 @@ int block_address_point(const Block *block, char face, double number, double *x,
 
     switch (normalized_face) {
         case 'S':
-            *x = block->x - number;
-            *y = block->y;
+            *x = data->x - number;
+            *y = data->y;
             return 1;
         case 'N':
-            *x = block->x - number;
-            *y = block->y + block->height;
+            *x = data->x - number;
+            *y = data->y + data->height;
             return 1;
         case 'L':
-            *x = block->x;
-            *y = block->y + number;
+            *x = data->x;
+            *y = data->y + number;
             return 1;
         case 'O':
-            *x = block->x - block->width;
-            *y = block->y + number;
+            *x = data->x - data->width;
+            *y = data->y + number;
             return 1;
         default:
             return 0;
