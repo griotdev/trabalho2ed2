@@ -1,4 +1,5 @@
 #include "args.h"
+#include "file_paths.h"
 
 #include <stdio.h>
 
@@ -8,6 +9,7 @@ static void print_usage(FILE *stream) {
 
 int main(int argc, char **argv) {
     AppArgs *args = args_create();
+    FilePaths *paths;
 
     if (args == NULL) {
         fputs("Erro: memoria insuficiente\n", stderr);
@@ -21,7 +23,29 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    puts("ted: argumentos validos; processamento ainda nao implementado");
+    paths = file_paths_create(args_input_dir(args),
+                              args_geo_file(args),
+                              args_query_file(args),
+                              args_via_file(args),
+                              args_output_dir(args));
+    if (paths == NULL) {
+        fputs("Erro: memoria insuficiente\n", stderr);
+        args_destroy(args);
+        return 1;
+    }
+
+    if (file_paths_error(paths) != NULL) {
+        fprintf(stderr, "Erro: %s\n", file_paths_error(paths));
+        file_paths_destroy(paths);
+        args_destroy(args);
+        return 1;
+    }
+
+    printf("GEO: %s\n", file_paths_geo_path(paths));
+    printf("TXT: %s\n", file_paths_txt_path(paths));
+    printf("SVG: %s\n", file_paths_svg_path(paths));
+
+    file_paths_destroy(paths);
     args_destroy(args);
     return 0;
 }
