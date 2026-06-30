@@ -10,6 +10,9 @@ typedef struct {
     double y;
     double width;
     double height;
+    double stroke_width;
+    char *fill_color;
+    char *stroke_color;
 } BlockData;
 
 static char *copy_string(const char *text) {
@@ -52,6 +55,13 @@ Block *block_create(const char *cep, double x, double y, double width, double he
     block->y = y;
     block->width = width;
     block->height = height;
+    block->stroke_width = 1.0;
+    block->fill_color = copy_string("none");
+    block->stroke_color = copy_string("black");
+    if (block->fill_color == NULL || block->stroke_color == NULL) {
+        block_destroy(block);
+        return NULL;
+    }
     return block;
 }
 
@@ -63,7 +73,33 @@ void block_destroy(Block *block) {
     }
 
     free(data->cep);
+    free(data->fill_color);
+    free(data->stroke_color);
     free(data);
+}
+
+void block_set_style(Block *block, double stroke_width, const char *fill_color, const char *stroke_color) {
+    BlockData *data = block;
+    char *new_fill;
+    char *new_stroke;
+
+    if (data == NULL || fill_color == NULL || stroke_color == NULL || stroke_width < 0.0) {
+        return;
+    }
+
+    new_fill = copy_string(fill_color);
+    new_stroke = copy_string(stroke_color);
+    if (new_fill == NULL || new_stroke == NULL) {
+        free(new_fill);
+        free(new_stroke);
+        return;
+    }
+
+    free(data->fill_color);
+    free(data->stroke_color);
+    data->stroke_width = stroke_width;
+    data->fill_color = new_fill;
+    data->stroke_color = new_stroke;
 }
 
 const char *block_cep(const Block *block) {
@@ -94,6 +130,24 @@ double block_height(const Block *block) {
     const BlockData *data = block;
 
     return data == NULL ? 0.0 : data->height;
+}
+
+double block_stroke_width(const Block *block) {
+    const BlockData *data = block;
+
+    return data == NULL ? 0.0 : data->stroke_width;
+}
+
+const char *block_fill_color(const Block *block) {
+    const BlockData *data = block;
+
+    return data == NULL ? NULL : data->fill_color;
+}
+
+const char *block_stroke_color(const Block *block) {
+    const BlockData *data = block;
+
+    return data == NULL ? NULL : data->stroke_color;
 }
 
 int block_address_point(const Block *block, char face, double number, double *x, double *y) {
