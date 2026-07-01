@@ -1,6 +1,7 @@
 #include "args.h"
 #include "file_paths.h"
 #include "geo.h"
+#include "output.h"
 
 #include <stdio.h>
 
@@ -63,6 +64,14 @@ int main(int argc, char **argv) {
     printf("Quadras: %d\n", geo_block_count(geo));
     printf("TXT: %s\n", file_paths_txt_path(paths));
     printf("SVG: %s\n", file_paths_svg_path(paths));
+
+    if (!output_write_txt(file_paths_txt_path(paths), geo) || !output_write_svg(file_paths_svg_path(paths), geo)) {
+        fprintf(stderr, "Erro: %s\n", output_error());
+        geo_destroy(geo);
+        file_paths_destroy(paths);
+        args_destroy(args);
+        return 1;
+    }
 
     geo_destroy(geo);
     file_paths_destroy(paths);
