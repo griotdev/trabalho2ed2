@@ -7,7 +7,7 @@ TEST_DIR := ../tests
 OBJ_DIR := ../obj
 BIN_DIR := ../bin
 TARGET := $(BIN_DIR)/ted.exe
-TEST_TARGETS := $(BIN_DIR)/test_args.exe $(BIN_DIR)/test_block.exe $(BIN_DIR)/test_geometry.exe $(BIN_DIR)/test_file_paths.exe $(BIN_DIR)/test_geo.exe $(BIN_DIR)/test_output.exe $(BIN_DIR)/test_graph.exe $(BIN_DIR)/test_via.exe
+TEST_TARGETS := $(BIN_DIR)/test_args.exe $(BIN_DIR)/test_block.exe $(BIN_DIR)/test_geometry.exe $(BIN_DIR)/test_file_paths.exe $(BIN_DIR)/test_geo.exe $(BIN_DIR)/test_output.exe $(BIN_DIR)/test_graph.exe $(BIN_DIR)/test_via.exe $(BIN_DIR)/test_registers.exe $(BIN_DIR)/test_qry.exe
 
 SOURCES := $(wildcard $(SRC_DIR)/*.c)
 OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SOURCES))
@@ -40,6 +40,8 @@ test: $(TEST_TARGETS)
 	$(BIN_DIR)/test_output.exe
 	$(BIN_DIR)/test_graph.exe
 	$(BIN_DIR)/test_via.exe
+	$(BIN_DIR)/test_registers.exe
+	$(BIN_DIR)/test_qry.exe
 
 $(BIN_DIR)/test_args.exe: $(OBJ_DIR)/test_args.o $(APP_OBJECTS) $(UNITY_OBJECT) | $(BIN_DIR)
 	$(CC) $(TEST_CFLAGS) $(OBJ_DIR)/test_args.o $(APP_OBJECTS) $(UNITY_OBJECT) -o $@
@@ -65,6 +67,12 @@ $(BIN_DIR)/test_graph.exe: $(OBJ_DIR)/test_graph.o $(APP_OBJECTS) $(UNITY_OBJECT
 $(BIN_DIR)/test_via.exe: $(OBJ_DIR)/test_via.o $(APP_OBJECTS) $(UNITY_OBJECT) | $(BIN_DIR)
 	$(CC) $(TEST_CFLAGS) $(OBJ_DIR)/test_via.o $(APP_OBJECTS) $(UNITY_OBJECT) -o $@
 
+$(BIN_DIR)/test_registers.exe: $(OBJ_DIR)/test_registers.o $(APP_OBJECTS) $(UNITY_OBJECT) | $(BIN_DIR)
+	$(CC) $(TEST_CFLAGS) $(OBJ_DIR)/test_registers.o $(APP_OBJECTS) $(UNITY_OBJECT) -o $@
+
+$(BIN_DIR)/test_qry.exe: $(OBJ_DIR)/test_qry.o $(APP_OBJECTS) $(UNITY_OBJECT) | $(BIN_DIR)
+	$(CC) $(TEST_CFLAGS) $(OBJ_DIR)/test_qry.o $(APP_OBJECTS) $(UNITY_OBJECT) -o $@
+
 $(OBJ_DIR)/test_args.o: $(TEST_DIR)/test_args.c | $(OBJ_DIR)
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -89,6 +97,12 @@ $(OBJ_DIR)/test_graph.o: $(TEST_DIR)/test_graph.c | $(OBJ_DIR)
 $(OBJ_DIR)/test_via.o: $(TEST_DIR)/test_via.c | $(OBJ_DIR)
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
+$(OBJ_DIR)/test_registers.o: $(TEST_DIR)/test_registers.c | $(OBJ_DIR)
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/test_qry.o: $(TEST_DIR)/test_qry.c | $(OBJ_DIR)
+	$(CC) $(TEST_CFLAGS) -c $< -o $@
+
 $(UNITY_OBJECT): $(TEST_DIR)/unity/unity.c | $(OBJ_DIR)
 	$(CC) $(TEST_CFLAGS) -c $< -o $@
 
@@ -103,3 +117,5 @@ clean:
 	-del /Q ..\bin\test_output.exe 2>NUL
 	-del /Q ..\bin\test_graph.exe 2>NUL
 	-del /Q ..\bin\test_via.exe 2>NUL
+	-del /Q ..\bin\test_registers.exe 2>NUL
+	-del /Q ..\bin\test_qry.exe 2>NUL

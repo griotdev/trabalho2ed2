@@ -2,6 +2,8 @@
 #include "file_paths.h"
 #include "geo.h"
 #include "output.h"
+#include "qry.h"
+#include "registers.h"
 #include "via.h"
 
 #include <stdio.h>
@@ -15,6 +17,7 @@ int main(int argc, char **argv) {
     FilePaths *paths;
     Geo *geo;
     Via *via = NULL;
+    Registers *registers = NULL;
 
     if (args == NULL) {
         fputs("Erro: memoria insuficiente\n", stderr);
@@ -101,6 +104,29 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    if (file_paths_query_path(paths) != NULL) {
+        registers = registers_create();
+        if (registers == NULL) {
+            fputs("Erro: memoria insuficiente\n", stderr);
+            via_destroy(via);
+            geo_destroy(geo);
+            file_paths_destroy(paths);
+            args_destroy(args);
+            return 1;
+        }
+
+        if (!qry_process(file_paths_query_path(paths), geo, registers, file_paths_txt_path(paths))) {
+            fprintf(stderr, "Erro: %s\n", qry_error());
+            registers_destroy(registers);
+            via_destroy(via);
+            geo_destroy(geo);
+            file_paths_destroy(paths);
+            args_destroy(args);
+            return 1;
+        }
+    }
+
+    registers_destroy(registers);
     via_destroy(via);
     geo_destroy(geo);
     file_paths_destroy(paths);
