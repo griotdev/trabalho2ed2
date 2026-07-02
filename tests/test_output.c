@@ -1,5 +1,6 @@
 #include "geo.h"
 #include "output.h"
+#include "registers.h"
 #include "unity.h"
 
 #include <stdio.h>
@@ -88,9 +89,32 @@ static void test_writes_svg_rectangles_with_style(void) {
     geo_destroy(geo);
 }
 
+static void test_writes_svg_register_markers(void) {
+    Geo *geo = load_sample_geo();
+    Registers *registers = registers_create();
+    char *content;
+
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(registers);
+    TEST_ASSERT_TRUE(registers_set(registers, 2, 90.0, 200.0));
+    TEST_ASSERT_TRUE(output_write_svg_with_registers(test_svg_path, geo, registers));
+    TEST_ASSERT_NULL(output_error());
+
+    content = read_file(test_svg_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "<line x1=\"90.00\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"red\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "stroke-dasharray=\"4 4\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, ">R2</text>"));
+
+    free(content);
+    registers_destroy(registers);
+    geo_destroy(geo);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_writes_txt_with_block_summary);
     RUN_TEST(test_writes_svg_rectangles_with_style);
+    RUN_TEST(test_writes_svg_register_markers);
     return UNITY_END();
 }

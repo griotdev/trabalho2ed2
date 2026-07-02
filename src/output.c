@@ -29,6 +29,49 @@ static int open_output(FILE **file, const char *path) {
     return 1;
 }
 
+static void write_svg_blocks(FILE *file, const Geo *geo) {
+    int i;
+
+    for (i = 0; i < geo_block_count(geo); i++) {
+        const Block *block = geo_block_at(geo, i);
+        fprintf(file,
+                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"%s\" stroke=\"%s\" stroke-width=\"%.2f\" />\n",
+                block_x(block) - block_width(block),
+                block_y(block),
+                block_width(block),
+                block_height(block),
+                block_fill_color(block),
+                block_stroke_color(block),
+                block_stroke_width(block));
+    }
+}
+
+static void write_svg_registers(FILE *file, const Registers *registers) {
+    int i;
+
+    if (registers == NULL) {
+        return;
+    }
+
+    for (i = 0; i <= 10; i++) {
+        if (registers_is_set(registers, i)) {
+            double x = registers_x(registers, i);
+            double y = registers_y(registers, i);
+
+            fprintf(file,
+                    "  <line x1=\"%.2f\" y1=\"0.00\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"red\" stroke-dasharray=\"4 4\" />\n",
+                    x,
+                    x,
+                    y);
+            fprintf(file,
+                    "  <text x=\"%.2f\" y=\"%.2f\" fill=\"red\">R%d</text>\n",
+                    x + 3.0,
+                    y,
+                    i);
+        }
+    }
+}
+
 int output_write_txt(const char *path, const Geo *geo) {
     FILE *file;
     int i;
@@ -58,26 +101,19 @@ int output_write_txt(const char *path, const Geo *geo) {
 }
 
 int output_write_svg(const char *path, const Geo *geo) {
+    return output_write_svg_with_registers(path, geo, NULL);
+}
+
+int output_write_svg_with_registers(const char *path, const Geo *geo, const Registers *registers) {
     FILE *file;
-    int i;
 
     if (!open_output(&file, path)) {
         return 0;
     }
 
     fputs("<svg xmlns=\"http://www.w3.org/2000/svg\">\n", file);
-    for (i = 0; i < geo_block_count(geo); i++) {
-        const Block *block = geo_block_at(geo, i);
-        fprintf(file,
-                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"%s\" stroke=\"%s\" stroke-width=\"%.2f\" />\n",
-                block_x(block) - block_width(block),
-                block_y(block),
-                block_width(block),
-                block_height(block),
-                block_fill_color(block),
-                block_stroke_color(block),
-                block_stroke_width(block));
-    }
+    write_svg_blocks(file, geo);
+    write_svg_registers(file, registers);
     fputs("</svg>\n", file);
 
     if (fclose(file) != 0) {

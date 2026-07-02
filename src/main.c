@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
     printf("TXT: %s\n", file_paths_txt_path(paths));
     printf("SVG: %s\n", file_paths_svg_path(paths));
 
-    if (!output_write_txt(file_paths_txt_path(paths), geo) || !output_write_svg(file_paths_svg_path(paths), geo)) {
+    if (!output_write_txt(file_paths_txt_path(paths), geo)) {
         fprintf(stderr, "Erro: %s\n", output_error());
         via_destroy(via);
         geo_destroy(geo);
@@ -124,6 +124,16 @@ int main(int argc, char **argv) {
             args_destroy(args);
             return 1;
         }
+    }
+
+    if (!output_write_svg_with_registers(file_paths_svg_path(paths), geo, registers)) {
+        fprintf(stderr, "Erro: %s\n", output_error());
+        registers_destroy(registers);
+        via_destroy(via);
+        geo_destroy(geo);
+        file_paths_destroy(paths);
+        args_destroy(args);
+        return 1;
     }
 
     registers_destroy(registers);
