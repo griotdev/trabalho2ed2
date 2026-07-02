@@ -2,6 +2,7 @@
 #include "file_paths.h"
 #include "geo.h"
 #include "output.h"
+#include "via.h"
 
 #include <stdio.h>
 
@@ -13,6 +14,7 @@ int main(int argc, char **argv) {
     AppArgs *args = args_create();
     FilePaths *paths;
     Geo *geo;
+    Via *via = NULL;
 
     if (args == NULL) {
         fputs("Erro: memoria insuficiente\n", stderr);
@@ -60,19 +62,46 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    if (file_paths_via_path(paths) != NULL) {
+        via = via_load(file_paths_via_path(paths));
+        if (via == NULL) {
+            fputs("Erro: memoria insuficiente\n", stderr);
+            geo_destroy(geo);
+            file_paths_destroy(paths);
+            args_destroy(args);
+            return 1;
+        }
+
+        if (via_error(via) != NULL) {
+            fprintf(stderr, "Erro: %s\n", via_error(via));
+            via_destroy(via);
+            geo_destroy(geo);
+            file_paths_destroy(paths);
+            args_destroy(args);
+            return 1;
+        }
+    }
+
     printf("GEO: %s\n", file_paths_geo_path(paths));
     printf("Quadras: %d\n", geo_block_count(geo));
+    if (via != NULL) {
+        printf("VIA: %s\n", file_paths_via_path(paths));
+        printf("Vertices: %d\n", graph_vertex_count(via_graph(via)));
+        printf("Arestas: %d\n", graph_edge_count(via_graph(via)));
+    }
     printf("TXT: %s\n", file_paths_txt_path(paths));
     printf("SVG: %s\n", file_paths_svg_path(paths));
 
     if (!output_write_txt(file_paths_txt_path(paths), geo) || !output_write_svg(file_paths_svg_path(paths), geo)) {
         fprintf(stderr, "Erro: %s\n", output_error());
+        via_destroy(via);
         geo_destroy(geo);
         file_paths_destroy(paths);
         args_destroy(args);
         return 1;
     }
 
+    via_destroy(via);
     geo_destroy(geo);
     file_paths_destroy(paths);
     args_destroy(args);
