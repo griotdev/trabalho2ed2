@@ -87,6 +87,30 @@ static const char *component_color(int index) {
     return colors[index % count];
 }
 
+static void write_svg_road_expansion(FILE *file, const Graph *graph, const RoadExpansion *expansion) {
+    int i;
+
+    if (graph == NULL || expansion == NULL) {
+        return;
+    }
+
+    for (i = 0; i < road_expansion_count(expansion); i++) {
+        int from = road_expansion_edge_from(expansion, i);
+        int to = road_expansion_edge_to(expansion, i);
+        int edge_index = road_expansion_edge_index(expansion, i);
+
+        if (from >= 0 && to >= 0) {
+            fprintf(file,
+                    "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"red\" stroke-width=\"4.00\">\n",
+                    graph_vertex_x(graph, from),
+                    graph_vertex_y(graph, from),
+                    graph_vertex_x(graph, to),
+                    graph_vertex_y(graph, to));
+            fprintf(file, "    <title>exp %s</title>\n", graph_edge_name(graph, from, edge_index));
+            fputs("  </line>\n", file);
+        }
+    }
+}
 static void write_svg_road_components(FILE *file, const RoadComponents *components) {
     int i;
 
@@ -168,18 +192,19 @@ int output_write_txt(const char *path, const Geo *geo) {
 }
 
 int output_write_svg(const char *path, const Geo *geo) {
-    return output_write_svg_with_graph(path, geo, NULL, NULL, NULL);
+    return output_write_svg_with_graph(path, geo, NULL, NULL, NULL, NULL);
 }
 
 int output_write_svg_with_registers(const char *path, const Geo *geo, const Registers *registers) {
-    return output_write_svg_with_graph(path, geo, NULL, registers, NULL);
+    return output_write_svg_with_graph(path, geo, NULL, registers, NULL, NULL);
 }
 
 int output_write_svg_with_graph(const char *path,
                                 const Geo *geo,
                                 const Graph *graph,
                                 const Registers *registers,
-                                const RoadComponents *road_components) {
+                                const RoadComponents *road_components,
+                                const RoadExpansion *road_expansion) {
     FILE *file;
 
     if (!open_output(&file, path)) {
@@ -190,6 +215,7 @@ int output_write_svg_with_graph(const char *path,
     write_svg_blocks(file, geo);
     write_svg_graph(file, graph);
     write_svg_road_components(file, road_components);
+    write_svg_road_expansion(file, graph, road_expansion);
     write_svg_registers(file, registers);
     fputs("</svg>\n", file);
 

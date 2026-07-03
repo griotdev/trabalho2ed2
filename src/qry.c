@@ -134,6 +134,40 @@ static int process_regs(Graph *graph, RoadComponents **road_components, FILE *tx
     return 1;
 }
 
+static int process_exp(Graph *graph, RoadExpansion **road_expansion, FILE *txt, const char *line) {
+    RoadExpansion *new_expansion;
+    double speed_limit;
+    int count;
+
+    if (sscanf(line, "exp %lf", &speed_limit) != 1) {
+        set_error("Comando exp malformado");
+        return 0;
+    }
+
+    if (graph == NULL) {
+        set_error("Comando exp requer arquivo VIA");
+        return 0;
+    }
+
+    new_expansion = road_expansion_apply(graph, speed_limit);
+    if (new_expansion == NULL) {
+        set_error("Nao foi possivel calcular expansao em exp");
+        return 0;
+    }
+
+    count = road_expansion_count(new_expansion);
+    fprintf(txt, "exp %.2f -> %d arestas ampliadas\n", speed_limit, count);
+
+    if (road_expansion != NULL) {
+        road_expansion_destroy(*road_expansion);
+        *road_expansion = new_expansion;
+    } else {
+        road_expansion_destroy(new_expansion);
+    }
+
+    return 1;
+}
+
 static int nearest_registered_vertex(const Graph *graph, const Registers *registers, int reg) {
     if (!registers_is_set(registers, reg)) {
         return -1;
@@ -219,6 +253,7 @@ static int process_line(const Geo *geo,
                         Graph *graph,
                         Registers *registers,
                         RoadComponents **road_components,
+                        RoadExpansion **road_expansion,
                         FILE *txt,
                         const char *line) {
     char command[16];
@@ -239,6 +274,10 @@ static int process_line(const Geo *geo,
         return process_regs(graph, road_components, txt, line);
     }
 
+    if (strcmp(command, "exp") == 0) {
+        return process_exp(graph, road_expansion, txt, line);
+    }
+
     if (strcmp(command, "p?") == 0) {
         return process_path_query(graph, registers, txt, line);
     }
@@ -251,6 +290,7 @@ int qry_process(const char *qry_path,
                 Graph *graph,
                 Registers *registers,
                 RoadComponents **road_components,
+                RoadExpansion **road_expansion,
                 const char *txt_path) {
     FILE *qry;
     FILE *txt;
@@ -277,7 +317,7 @@ int qry_process(const char *qry_path,
     }
 
     while (fgets(line, sizeof(line), qry) != NULL) {
-        if (!process_line(geo, graph, registers, road_components, txt, line)) {
+        if (!process_line(geo, graph, registers, road_components, road_expansion, txt, line)) {
             fclose(txt);
             fclose(qry);
             return 0;

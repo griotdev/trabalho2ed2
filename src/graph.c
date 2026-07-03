@@ -330,6 +330,18 @@ double graph_edge_speed(const Graph *graph, int vertex_index, int edge_index) {
     return edge == NULL ? 0.0 : edge->speed;
 }
 
+int graph_set_edge_speed(Graph *graph, int vertex_index, int edge_index, double speed) {
+    GraphData *data = graph;
+    EdgeData *edge = edge_at(data, vertex_index, edge_index);
+
+    if (edge == NULL || speed < 0.0) {
+        return 0;
+    }
+
+    edge->speed = speed;
+    return 1;
+}
+
 static int graph_point_inside_rect(double px, double py, double x, double y, double width, double height) {
     return px >= x && px <= x + width && py >= y && py <= y + height;
 }

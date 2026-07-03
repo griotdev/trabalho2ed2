@@ -5,6 +5,7 @@
 #include "qry.h"
 #include "registers.h"
 #include "road_components.h"
+#include "road_expansion.h"
 #include "via.h"
 
 #include <stdio.h>
@@ -20,6 +21,7 @@ int main(int argc, char **argv) {
     Via *via = NULL;
     Registers *registers = NULL;
     RoadComponents *road_components = NULL;
+    RoadExpansion *road_expansion = NULL;
 
     if (args == NULL) {
         fputs("Erro: memoria insuficiente\n", stderr);
@@ -122,8 +124,10 @@ int main(int argc, char **argv) {
                          via == NULL ? NULL : via_graph(via),
                          registers,
                          &road_components,
+                         &road_expansion,
                          file_paths_txt_path(paths))) {
             fprintf(stderr, "Erro: %s\n", qry_error());
+            road_expansion_destroy(road_expansion);
             road_components_destroy(road_components);
             registers_destroy(registers);
             via_destroy(via);
@@ -138,8 +142,10 @@ int main(int argc, char **argv) {
                                      geo,
                                      via == NULL ? NULL : via_graph(via),
                                      registers,
-                                     road_components)) {
+                                     road_components,
+                                     road_expansion)) {
         fprintf(stderr, "Erro: %s\n", output_error());
+        road_expansion_destroy(road_expansion);
         road_components_destroy(road_components);
         registers_destroy(registers);
         via_destroy(via);
@@ -149,6 +155,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    road_expansion_destroy(road_expansion);
     road_components_destroy(road_components);
     registers_destroy(registers);
     via_destroy(via);
