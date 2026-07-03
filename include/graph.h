@@ -19,6 +19,7 @@ int graph_add_edge(Graph *graph,
 int graph_vertex_count(const Graph *graph);
 int graph_edge_count(const Graph *graph);
 int graph_find_vertex(const Graph *graph, const char *id);
+int graph_nearest_vertex(const Graph *graph, double x, double y);
 const char *graph_vertex_id(const Graph *graph, int vertex_index);
 double graph_vertex_x(const Graph *graph, int vertex_index);
 double graph_vertex_y(const Graph *graph, int vertex_index);
@@ -33,3 +34,4 @@ double graph_edge_speed(const Graph *graph, int vertex_index, int edge_index);
 int graph_update_speeds_in_rect(Graph *graph, double speed, double x, double y, double width, double height);
 
 #endif
+

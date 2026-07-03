@@ -158,11 +158,60 @@ static void test_reports_mvm_without_graph(void) {
     geo_destroy(geo);
 }
 
+static Graph *create_path_graph(void) {
+    Graph *graph = graph_create();
+
+    TEST_ASSERT_NOT_NULL(graph);
+    graph_add_vertex(graph, "a", 0.0, 0.0);
+    graph_add_vertex(graph, "b", 10.0, 0.0);
+    graph_add_vertex(graph, "c", 20.0, 0.0);
+    graph_add_vertex(graph, "d", 30.0, 0.0);
+    graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 1.0, "Rua_AB");
+    graph_add_edge(graph, "b", "d", "cepR", "cepL", 10.0, 1.0, "Rua_BD");
+    graph_add_edge(graph, "a", "c", "cepR", "cepL", 30.0, 30.0, "Rua_AC");
+    graph_add_edge(graph, "c", "d", "cepR", "cepL", 30.0, 30.0, "Rua_CD");
+
+    return graph;
+}
+
+static void test_processes_path_query(void) {
+    Geo *geo;
+    Graph *graph;
+    Registers *registers;
+    char *content;
+
+    write_file(test_geo_path, "q cep1 100 200 40 30\n");
+    write_file(test_qry_path, "p? R1 R2 red blue\n");
+    write_file(test_txt_path, "base\n");
+
+    geo = geo_load(test_geo_path);
+    graph = create_path_graph();
+    registers = registers_create();
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(registers);
+    TEST_ASSERT_TRUE(registers_set(registers, 1, 1.0, 0.0));
+    TEST_ASSERT_TRUE(registers_set(registers, 2, 31.0, 0.0));
+
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, test_txt_path));
+    TEST_ASSERT_NULL(qry_error());
+
+    content = read_file(test_txt_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "p? R1 R2 red blue"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "menor caminho: a -> b -> d | peso 20.00"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "caminho mais rapido: a -> c -> d | peso 2.00"));
+
+    free(content);
+    registers_destroy(registers);
+    graph_destroy(graph);
+    geo_destroy(geo);
+}
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_processes_address_query);
     RUN_TEST(test_reports_missing_cep);
     RUN_TEST(test_processes_mvm_query);
     RUN_TEST(test_reports_mvm_without_graph);
+    RUN_TEST(test_processes_path_query);
     return UNITY_END();
 }
+

@@ -224,6 +224,30 @@ int graph_find_vertex(const Graph *graph, const char *id) {
     return -1;
 }
 
+int graph_nearest_vertex(const Graph *graph, double x, double y) {
+    const GraphData *data = graph;
+    double best_distance = 0.0;
+    int best_index = -1;
+    int i;
+
+    if (data == NULL || data->vertex_count == 0) {
+        return -1;
+    }
+
+    for (i = 0; i < data->vertex_count; i++) {
+        double dx = data->vertices[i].x - x;
+        double dy = data->vertices[i].y - y;
+        double distance = dx * dx + dy * dy;
+
+        if (best_index < 0 || distance < best_distance) {
+            best_distance = distance;
+            best_index = i;
+        }
+    }
+
+    return best_index;
+}
+
 const char *graph_vertex_id(const Graph *graph, int vertex_index) {
     const GraphData *data = graph;
 
@@ -340,3 +364,5 @@ int graph_update_speeds_in_rect(Graph *graph, double speed, double x, double y, 
 
     return updated;
 }
+
+

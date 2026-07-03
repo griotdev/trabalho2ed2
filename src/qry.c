@@ -1,4 +1,5 @@
 #include "qry.h"
+#include "route.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -99,6 +100,87 @@ static int process_mvm(Graph *graph, FILE *txt, const char *line) {
     return 1;
 }
 
+static int nearest_registered_vertex(const Graph *graph, const Registers *registers, int reg) {
+    if (!registers_is_set(registers, reg)) {
+        return -1;
+    }
+
+    return graph_nearest_vertex(graph, registers_x(registers, reg), registers_y(registers, reg));
+}
+
+static void write_route(FILE *txt, const Graph *graph, const char *label, const Route *route) {
+    int i;
+
+    fprintf(txt, "%s: ", label);
+    if (!route_found(route)) {
+        fprintf(txt, "Destino inacessivel\n");
+        return;
+    }
+
+    for (i = 0; i < route_vertex_count(route); i++) {
+        if (i > 0) {
+            fprintf(txt, " -> ");
+        }
+        fprintf(txt, "%s", graph_vertex_id(graph, route_vertex_at(route, i)));
+    }
+    fprintf(txt, " | peso %.2f\n", route_total_weight(route));
+}
+
+static int process_path_query(Graph *graph, Registers *registers, FILE *txt, const char *line) {
+    char origin_text[16];
+    char destination_text[16];
+    char shortest_color[32];
+    char fastest_color[32];
+    int origin_reg;
+    int destination_reg;
+    int origin;
+    int destination;
+    Route *shortest;
+    Route *fastest;
+
+    if (sscanf(line, "p? %15s %15s %31s %31s", origin_text, destination_text, shortest_color, fastest_color) != 4) {
+        set_error("Comando p? malformado");
+        return 0;
+    }
+
+    if (graph == NULL) {
+        set_error("Comando p? requer arquivo VIA");
+        return 0;
+    }
+
+    origin_reg = parse_register(origin_text);
+    destination_reg = parse_register(destination_text);
+    if (origin_reg < 0 || destination_reg < 0 || !registers_is_set(registers, origin_reg) ||
+        !registers_is_set(registers, destination_reg)) {
+        set_error("Registrador invalido em p?");
+        return 0;
+    }
+
+    origin = nearest_registered_vertex(graph, registers, origin_reg);
+    destination = nearest_registered_vertex(graph, registers, destination_reg);
+    if (origin < 0 || destination < 0) {
+        set_error("Vertice viario nao encontrado em p?");
+        return 0;
+    }
+
+    shortest = route_shortest_path(graph, origin, destination, ROUTE_METRIC_LENGTH);
+    fastest = route_shortest_path(graph, origin, destination, ROUTE_METRIC_TIME);
+    if (shortest == NULL || fastest == NULL) {
+        route_destroy(shortest);
+        route_destroy(fastest);
+        set_error("Nao foi possivel calcular rota em p?");
+        return 0;
+    }
+
+    fprintf(txt, "p? R%d R%d %s %s\n", origin_reg, destination_reg, shortest_color, fastest_color);
+    write_route(txt, graph, "menor caminho", shortest);
+    write_route(txt, graph, "caminho mais rapido", fastest);
+
+    route_destroy(shortest);
+    route_destroy(fastest);
+    return 1;
+}
+
 static int process_line(const Geo *geo, Graph *graph, Registers *registers, FILE *txt, const char *line) {
     char command[16];
 
@@ -112,6 +194,10 @@ static int process_line(const Geo *geo, Graph *graph, Registers *registers, FILE
 
     if (strcmp(command, "mvm") == 0) {
         return process_mvm(graph, txt, line);
+    }
+
+    if (strcmp(command, "p?") == 0) {
+        return process_path_query(graph, registers, txt, line);
     }
 
     return 1;

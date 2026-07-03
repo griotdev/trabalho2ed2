@@ -74,6 +74,18 @@ static void test_rejects_edges_with_missing_vertices(void) {
     graph_destroy(graph);
 }
 
+static void test_finds_nearest_vertex(void) {
+    Graph *graph = graph_create();
+
+    TEST_ASSERT_NOT_NULL(graph);
+    graph_add_vertex(graph, "v1", 0.0, 0.0);
+    graph_add_vertex(graph, "v2", 100.0, 100.0);
+    graph_add_vertex(graph, "v3", 20.0, 10.0);
+
+    TEST_ASSERT_EQUAL_INT(graph_find_vertex(graph, "v3"), graph_nearest_vertex(graph, 18.0, 12.0));
+
+    graph_destroy(graph);
+}
 static void test_updates_speeds_inside_rect(void) {
     Graph *graph = graph_create();
     int from;
@@ -99,6 +111,8 @@ int main(void) {
     RUN_TEST(test_rejects_duplicate_vertices);
     RUN_TEST(test_adds_directed_edges_as_adjacencies);
     RUN_TEST(test_rejects_edges_with_missing_vertices);
+    RUN_TEST(test_finds_nearest_vertex);
     RUN_TEST(test_updates_speeds_inside_rect);
     return UNITY_END();
 }
+
