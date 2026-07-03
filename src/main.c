@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (!output_write_svg_with_registers(file_paths_svg_path(paths), geo, registers)) {
+    if (!output_write_svg_with_graph(file_paths_svg_path(paths), geo, via == NULL ? NULL : via_graph(via), registers)) {
         fprintf(stderr, "Erro: %s\n", output_error());
         registers_destroy(registers);
         via_destroy(via);
@@ -143,4 +143,5 @@ int main(int argc, char **argv) {
     args_destroy(args);
     return 0;
 }
+
 

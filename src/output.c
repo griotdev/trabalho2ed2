@@ -46,6 +46,40 @@ static void write_svg_blocks(FILE *file, const Geo *geo) {
     }
 }
 
+static void write_svg_graph(FILE *file, const Graph *graph) {
+    int i;
+
+    if (graph == NULL) {
+        return;
+    }
+
+    for (i = 0; i < graph_vertex_count(graph); i++) {
+        int edge_index;
+
+        for (edge_index = 0; edge_index < graph_out_degree(graph, i); edge_index++) {
+            int to = graph_edge_to(graph, i, edge_index);
+
+            if (to >= 0) {
+                fprintf(file,
+                        "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"#777\" stroke-width=\"1.50\">\n",
+                        graph_vertex_x(graph, i),
+                        graph_vertex_y(graph, i),
+                        graph_vertex_x(graph, to),
+                        graph_vertex_y(graph, to));
+                fprintf(file, "    <title>%s</title>\n", graph_edge_name(graph, i, edge_index));
+                fputs("  </line>\n", file);
+            }
+        }
+    }
+
+    for (i = 0; i < graph_vertex_count(graph); i++) {
+        fprintf(file,
+                "  <circle cx=\"%.2f\" cy=\"%.2f\" r=\"2.00\" fill=\"#222\" />\n",
+                graph_vertex_x(graph, i),
+                graph_vertex_y(graph, i));
+    }
+}
+
 static void write_svg_registers(FILE *file, const Registers *registers) {
     int i;
 
@@ -101,10 +135,14 @@ int output_write_txt(const char *path, const Geo *geo) {
 }
 
 int output_write_svg(const char *path, const Geo *geo) {
-    return output_write_svg_with_registers(path, geo, NULL);
+    return output_write_svg_with_graph(path, geo, NULL, NULL);
 }
 
 int output_write_svg_with_registers(const char *path, const Geo *geo, const Registers *registers) {
+    return output_write_svg_with_graph(path, geo, NULL, registers);
+}
+
+int output_write_svg_with_graph(const char *path, const Geo *geo, const Graph *graph, const Registers *registers) {
     FILE *file;
 
     if (!open_output(&file, path)) {
@@ -113,6 +151,7 @@ int output_write_svg_with_registers(const char *path, const Geo *geo, const Regi
 
     fputs("<svg xmlns=\"http://www.w3.org/2000/svg\">\n", file);
     write_svg_blocks(file, geo);
+    write_svg_graph(file, graph);
     write_svg_registers(file, registers);
     fputs("</svg>\n", file);
 

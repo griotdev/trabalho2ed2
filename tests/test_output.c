@@ -1,4 +1,5 @@
 #include "geo.h"
+#include "graph.h"
 #include "output.h"
 #include "registers.h"
 #include "unity.h"
@@ -111,10 +112,36 @@ static void test_writes_svg_register_markers(void) {
     geo_destroy(geo);
 }
 
+static void test_writes_svg_graph_edges(void) {
+    Geo *geo = load_sample_geo();
+    Graph *graph = graph_create();
+    char *content;
+
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(graph);
+    graph_add_vertex(graph, "v1", 10.0, 20.0);
+    graph_add_vertex(graph, "v2", 30.0, 40.0);
+    graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
+
+    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL));
+    TEST_ASSERT_NULL(output_error());
+
+    content = read_file(test_svg_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "x1=\"10.00\" y1=\"20.00\" x2=\"30.00\" y2=\"40.00\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"#777\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, ">Rua_A</title>"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<circle cx=\"10.00\" cy=\"20.00\""));
+
+    free(content);
+    graph_destroy(graph);
+    geo_destroy(geo);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_writes_txt_with_block_summary);
     RUN_TEST(test_writes_svg_rectangles_with_style);
     RUN_TEST(test_writes_svg_register_markers);
+    RUN_TEST(test_writes_svg_graph_edges);
     return UNITY_END();
 }
