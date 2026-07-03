@@ -1,4 +1,5 @@
 #include "geo.h"
+#include "graph.h"
 #include "qry.h"
 #include "registers.h"
 #include "unity.h"
@@ -62,7 +63,7 @@ static void test_processes_address_query(void) {
     TEST_ASSERT_NULL(geo_error(geo));
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, registers, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, NULL, registers, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
     TEST_ASSERT_TRUE(registers_is_set(registers, 2));
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 90.0, registers_x(registers, 2));
@@ -89,9 +90,69 @@ static void test_reports_missing_cep(void) {
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, registers, test_txt_path));
+    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, test_txt_path));
     TEST_ASSERT_NOT_NULL(qry_error());
     TEST_ASSERT_FALSE(registers_is_set(registers, 2));
+
+    registers_destroy(registers);
+    geo_destroy(geo);
+}
+
+static void test_processes_mvm_query(void) {
+    Geo *geo;
+    Graph *graph;
+    Registers *registers;
+    char *content;
+    int from;
+
+    write_file(test_geo_path, "q cep1 100 200 40 30\n");
+    write_file(test_qry_path, "mvm 12 0 0 30 30\n");
+    write_file(test_txt_path, "base\n");
+
+    geo = geo_load(test_geo_path);
+    graph = graph_create();
+    registers = registers_create();
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(graph);
+    TEST_ASSERT_NOT_NULL(registers);
+
+    graph_add_vertex(graph, "v1", 10.0, 10.0);
+    graph_add_vertex(graph, "v2", 20.0, 20.0);
+    graph_add_vertex(graph, "v3", 100.0, 100.0);
+    graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
+    graph_add_edge(graph, "v1", "v3", "cepR", "cepL", 90.0, 4.0, "Rua_B");
+
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, test_txt_path));
+    TEST_ASSERT_NULL(qry_error());
+
+    from = graph_find_vertex(graph, "v1");
+    TEST_ASSERT_DOUBLE_WITHIN(0.000001, 12.0, graph_edge_speed(graph, from, 0));
+    TEST_ASSERT_DOUBLE_WITHIN(0.000001, 4.0, graph_edge_speed(graph, from, 1));
+
+    content = read_file(test_txt_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "mvm 12.00 0.00 0.00 30.00 30.00 -> 1 arestas atualizadas"));
+
+    free(content);
+    registers_destroy(registers);
+    graph_destroy(graph);
+    geo_destroy(geo);
+}
+
+static void test_reports_mvm_without_graph(void) {
+    Geo *geo;
+    Registers *registers;
+
+    write_file(test_geo_path, "q cep1 100 200 40 30\n");
+    write_file(test_qry_path, "mvm 12 0 0 30 30\n");
+    write_file(test_txt_path, "base\n");
+
+    geo = geo_load(test_geo_path);
+    registers = registers_create();
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(registers);
+
+    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, test_txt_path));
+    TEST_ASSERT_NOT_NULL(qry_error());
 
     registers_destroy(registers);
     geo_destroy(geo);
@@ -101,5 +162,7 @@ int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_processes_address_query);
     RUN_TEST(test_reports_missing_cep);
+    RUN_TEST(test_processes_mvm_query);
+    RUN_TEST(test_reports_mvm_without_graph);
     return UNITY_END();
 }

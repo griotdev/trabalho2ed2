@@ -137,8 +137,8 @@ void via_destroy(Via *via) {
     free(data);
 }
 
-const Graph *via_graph(const Via *via) {
-    const ViaData *data = via;
+Graph *via_graph(Via *via) {
+    ViaData *data = via;
 
     return data == NULL ? NULL : data->graph;
 }
@@ -152,3 +152,5 @@ const char *via_error(const Via *via) {
 
     return data->error;
 }
+
+

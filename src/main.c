@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        if (!qry_process(file_paths_query_path(paths), geo, registers, file_paths_txt_path(paths))) {
+        if (!qry_process(file_paths_query_path(paths), geo, via == NULL ? NULL : via_graph(via), registers, file_paths_txt_path(paths))) {
             fprintf(stderr, "Erro: %s\n", qry_error());
             registers_destroy(registers);
             via_destroy(via);
@@ -143,3 +143,4 @@ int main(int argc, char **argv) {
     args_destroy(args);
     return 0;
 }
+

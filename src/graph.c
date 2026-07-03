@@ -305,3 +305,38 @@ double graph_edge_speed(const Graph *graph, int vertex_index, int edge_index) {
 
     return edge == NULL ? 0.0 : edge->speed;
 }
+
+static int graph_point_inside_rect(double px, double py, double x, double y, double width, double height) {
+    return px >= x && px <= x + width && py >= y && py <= y + height;
+}
+
+int graph_update_speeds_in_rect(Graph *graph, double speed, double x, double y, double width, double height) {
+    GraphData *data = graph;
+    int updated = 0;
+    int i;
+
+    if (data == NULL || speed < 0.0 || width < 0.0 || height < 0.0) {
+        return -1;
+    }
+
+    for (i = 0; i < data->vertex_count; i++) {
+        EdgeData *edge;
+        int from_inside = graph_point_inside_rect(data->vertices[i].x, data->vertices[i].y, x, y, width, height);
+
+        if (!from_inside) {
+            continue;
+        }
+
+        edge = data->vertices[i].first_edge;
+        while (edge != NULL) {
+            VertexData *to = &data->vertices[edge->to];
+            if (graph_point_inside_rect(to->x, to->y, x, y, width, height)) {
+                edge->speed = speed;
+                updated++;
+            }
+            edge = edge->next;
+        }
+    }
+
+    return updated;
+}

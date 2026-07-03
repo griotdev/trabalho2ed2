@@ -74,11 +74,31 @@ static void test_rejects_edges_with_missing_vertices(void) {
     graph_destroy(graph);
 }
 
+static void test_updates_speeds_inside_rect(void) {
+    Graph *graph = graph_create();
+    int from;
+
+    TEST_ASSERT_NOT_NULL(graph);
+    graph_add_vertex(graph, "v1", 10.0, 10.0);
+    graph_add_vertex(graph, "v2", 20.0, 20.0);
+    graph_add_vertex(graph, "v3", 100.0, 100.0);
+    graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
+    graph_add_edge(graph, "v1", "v3", "cepR", "cepL", 90.0, 4.0, "Rua_B");
+
+    from = graph_find_vertex(graph, "v1");
+    TEST_ASSERT_EQUAL_INT(1, graph_update_speeds_in_rect(graph, 12.0, 0.0, 0.0, 30.0, 30.0));
+    TEST_ASSERT_DOUBLE_WITHIN(0.000001, 12.0, graph_edge_speed(graph, from, 0));
+    TEST_ASSERT_DOUBLE_WITHIN(0.000001, 4.0, graph_edge_speed(graph, from, 1));
+
+    graph_destroy(graph);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_adds_vertices);
     RUN_TEST(test_rejects_duplicate_vertices);
     RUN_TEST(test_adds_directed_edges_as_adjacencies);
     RUN_TEST(test_rejects_edges_with_missing_vertices);
+    RUN_TEST(test_updates_speeds_inside_rect);
     return UNITY_END();
 }

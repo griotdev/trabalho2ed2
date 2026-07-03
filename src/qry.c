@@ -71,7 +71,35 @@ static int process_address_query(const Geo *geo, Registers *registers, FILE *txt
     return 1;
 }
 
-static int process_line(const Geo *geo, Registers *registers, FILE *txt, const char *line) {
+static int process_mvm(Graph *graph, FILE *txt, const char *line) {
+    double speed;
+    double x;
+    double y;
+    double width;
+    double height;
+    int updated;
+
+    if (sscanf(line, "mvm %lf %lf %lf %lf %lf", &speed, &x, &y, &width, &height) != 5) {
+        set_error("Comando mvm malformado");
+        return 0;
+    }
+
+    if (graph == NULL) {
+        set_error("Comando mvm requer arquivo VIA");
+        return 0;
+    }
+
+    updated = graph_update_speeds_in_rect(graph, speed, x, y, width, height);
+    if (updated < 0) {
+        set_error("Regiao invalida em mvm");
+        return 0;
+    }
+
+    fprintf(txt, "mvm %.2f %.2f %.2f %.2f %.2f -> %d arestas atualizadas\n", speed, x, y, width, height, updated);
+    return 1;
+}
+
+static int process_line(const Geo *geo, Graph *graph, Registers *registers, FILE *txt, const char *line) {
     char command[16];
 
     if (sscanf(line, "%15s", command) != 1) {
@@ -82,10 +110,14 @@ static int process_line(const Geo *geo, Registers *registers, FILE *txt, const c
         return process_address_query(geo, registers, txt, line);
     }
 
+    if (strcmp(command, "mvm") == 0) {
+        return process_mvm(graph, txt, line);
+    }
+
     return 1;
 }
 
-int qry_process(const char *qry_path, const Geo *geo, Registers *registers, const char *txt_path) {
+int qry_process(const char *qry_path, const Geo *geo, Graph *graph, Registers *registers, const char *txt_path) {
     FILE *qry;
     FILE *txt;
     char line[512];
@@ -111,7 +143,7 @@ int qry_process(const char *qry_path, const Geo *geo, Registers *registers, cons
     }
 
     while (fgets(line, sizeof(line), qry) != NULL) {
-        if (!process_line(geo, registers, txt, line)) {
+        if (!process_line(geo, graph, registers, txt, line)) {
             fclose(txt);
             fclose(qry);
             return 0;
