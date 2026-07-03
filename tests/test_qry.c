@@ -2,6 +2,7 @@
 #include "graph.h"
 #include "qry.h"
 #include "registers.h"
+#include "road_components.h"
 #include "unity.h"
 
 #include <stdio.h>
@@ -63,7 +64,7 @@ static void test_processes_address_query(void) {
     TEST_ASSERT_NULL(geo_error(geo));
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, NULL, registers, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, NULL, registers, NULL, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
     TEST_ASSERT_TRUE(registers_is_set(registers, 2));
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 90.0, registers_x(registers, 2));
@@ -90,7 +91,7 @@ static void test_reports_missing_cep(void) {
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, test_txt_path));
+    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, NULL, test_txt_path));
     TEST_ASSERT_NOT_NULL(qry_error());
     TEST_ASSERT_FALSE(registers_is_set(registers, 2));
 
@@ -122,7 +123,7 @@ static void test_processes_mvm_query(void) {
     graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
     graph_add_edge(graph, "v1", "v3", "cepR", "cepL", 90.0, 4.0, "Rua_B");
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
 
     from = graph_find_vertex(graph, "v1");
@@ -151,7 +152,7 @@ static void test_reports_mvm_without_graph(void) {
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, test_txt_path));
+    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, NULL, test_txt_path));
     TEST_ASSERT_NOT_NULL(qry_error());
 
     registers_destroy(registers);
@@ -192,7 +193,7 @@ static void test_processes_path_query(void) {
     TEST_ASSERT_TRUE(registers_set(registers, 1, 1.0, 0.0));
     TEST_ASSERT_TRUE(registers_set(registers, 2, 31.0, 0.0));
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
 
     content = read_file(test_txt_path);
@@ -205,6 +206,56 @@ static void test_processes_path_query(void) {
     graph_destroy(graph);
     geo_destroy(geo);
 }
+
+static Graph *create_regs_graph(void) {
+    Graph *graph = graph_create();
+
+    TEST_ASSERT_NOT_NULL(graph);
+    graph_add_vertex(graph, "a", 0.0, 0.0);
+    graph_add_vertex(graph, "b", 10.0, 5.0);
+    graph_add_vertex(graph, "c", 100.0, 100.0);
+    graph_add_vertex(graph, "d", 120.0, 130.0);
+    graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 20.0, "Rua_AB");
+    graph_add_edge(graph, "b", "c", "cepR", "cepL", 10.0, 80.0, "Rua_BC");
+    graph_add_edge(graph, "c", "d", "cepR", "cepL", 10.0, 15.0, "Rua_CD");
+
+    return graph;
+}
+
+static void test_processes_regs_query(void) {
+    Geo *geo;
+    Graph *graph;
+    Registers *registers;
+    RoadComponents *components = NULL;
+    char *content;
+
+    write_file(test_geo_path, "q cep1 100 200 40 30\n");
+    write_file(test_qry_path, "regs 30\n");
+    write_file(test_txt_path, "base\n");
+
+    geo = geo_load(test_geo_path);
+    graph = create_regs_graph();
+    registers = registers_create();
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(registers);
+
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, &components, test_txt_path));
+    TEST_ASSERT_NULL(qry_error());
+    TEST_ASSERT_NOT_NULL(components);
+    TEST_ASSERT_EQUAL_INT(2, road_components_count(components));
+    TEST_ASSERT_DOUBLE_WITHIN(0.000001, 0.0, road_components_min_x(components, 0));
+    TEST_ASSERT_DOUBLE_WITHIN(0.000001, 130.0, road_components_max_y(components, 1));
+
+    content = read_file(test_txt_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "regs 30.00 -> 2 componentes conexos"));
+
+    free(content);
+    road_components_destroy(components);
+    registers_destroy(registers);
+    graph_destroy(graph);
+    geo_destroy(geo);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_processes_address_query);
@@ -212,6 +263,6 @@ int main(void) {
     RUN_TEST(test_processes_mvm_query);
     RUN_TEST(test_reports_mvm_without_graph);
     RUN_TEST(test_processes_path_query);
+    RUN_TEST(test_processes_regs_query);
     return UNITY_END();
 }
-

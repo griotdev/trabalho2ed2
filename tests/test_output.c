@@ -123,7 +123,7 @@ static void test_writes_svg_graph_edges(void) {
     graph_add_vertex(graph, "v2", 30.0, 40.0);
     graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
 
-    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL));
+    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, NULL));
     TEST_ASSERT_NULL(output_error());
 
     content = read_file(test_svg_path);
@@ -137,11 +137,39 @@ static void test_writes_svg_graph_edges(void) {
     geo_destroy(geo);
 }
 
+static void test_writes_svg_road_component_boxes(void) {
+    Geo *geo = load_sample_geo();
+    Graph *graph = graph_create();
+    RoadComponents *components;
+    char *content;
+
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(graph);
+    graph_add_vertex(graph, "v1", 10.0, 20.0);
+    graph_add_vertex(graph, "v2", 30.0, 40.0);
+    graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
+    components = road_components_find_slow(graph, 10.0);
+    TEST_ASSERT_NOT_NULL(components);
+
+    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, components));
+    TEST_ASSERT_NULL(output_error());
+
+    content = read_file(test_svg_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "x=\"10.00\" y=\"20.00\" width=\"20.00\" height=\"20.00\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "fill-opacity=\"0.50\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "stroke-width=\"2.00\""));
+
+    free(content);
+    road_components_destroy(components);
+    graph_destroy(graph);
+    geo_destroy(geo);
+}
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_writes_txt_with_block_summary);
     RUN_TEST(test_writes_svg_rectangles_with_style);
     RUN_TEST(test_writes_svg_register_markers);
     RUN_TEST(test_writes_svg_graph_edges);
+    RUN_TEST(test_writes_svg_road_component_boxes);
     return UNITY_END();
 }

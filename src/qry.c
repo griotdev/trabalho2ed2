@@ -100,6 +100,40 @@ static int process_mvm(Graph *graph, FILE *txt, const char *line) {
     return 1;
 }
 
+static int process_regs(Graph *graph, RoadComponents **road_components, FILE *txt, const char *line) {
+    RoadComponents *new_components;
+    double speed_limit;
+    int count;
+
+    if (sscanf(line, "regs %lf", &speed_limit) != 1) {
+        set_error("Comando regs malformado");
+        return 0;
+    }
+
+    if (graph == NULL) {
+        set_error("Comando regs requer arquivo VIA");
+        return 0;
+    }
+
+    new_components = road_components_find_slow(graph, speed_limit);
+    if (new_components == NULL) {
+        set_error("Nao foi possivel calcular componentes em regs");
+        return 0;
+    }
+
+    count = road_components_count(new_components);
+    fprintf(txt, "regs %.2f -> %d componentes conexos\n", speed_limit, count);
+
+    if (road_components != NULL) {
+        road_components_destroy(*road_components);
+        *road_components = new_components;
+    } else {
+        road_components_destroy(new_components);
+    }
+
+    return 1;
+}
+
 static int nearest_registered_vertex(const Graph *graph, const Registers *registers, int reg) {
     if (!registers_is_set(registers, reg)) {
         return -1;
@@ -181,7 +215,12 @@ static int process_path_query(Graph *graph, Registers *registers, FILE *txt, con
     return 1;
 }
 
-static int process_line(const Geo *geo, Graph *graph, Registers *registers, FILE *txt, const char *line) {
+static int process_line(const Geo *geo,
+                        Graph *graph,
+                        Registers *registers,
+                        RoadComponents **road_components,
+                        FILE *txt,
+                        const char *line) {
     char command[16];
 
     if (sscanf(line, "%15s", command) != 1) {
@@ -196,6 +235,10 @@ static int process_line(const Geo *geo, Graph *graph, Registers *registers, FILE
         return process_mvm(graph, txt, line);
     }
 
+    if (strcmp(command, "regs") == 0) {
+        return process_regs(graph, road_components, txt, line);
+    }
+
     if (strcmp(command, "p?") == 0) {
         return process_path_query(graph, registers, txt, line);
     }
@@ -203,7 +246,12 @@ static int process_line(const Geo *geo, Graph *graph, Registers *registers, FILE
     return 1;
 }
 
-int qry_process(const char *qry_path, const Geo *geo, Graph *graph, Registers *registers, const char *txt_path) {
+int qry_process(const char *qry_path,
+                const Geo *geo,
+                Graph *graph,
+                Registers *registers,
+                RoadComponents **road_components,
+                const char *txt_path) {
     FILE *qry;
     FILE *txt;
     char line[512];
@@ -229,7 +277,7 @@ int qry_process(const char *qry_path, const Geo *geo, Graph *graph, Registers *r
     }
 
     while (fgets(line, sizeof(line), qry) != NULL) {
-        if (!process_line(geo, graph, registers, txt, line)) {
+        if (!process_line(geo, graph, registers, road_components, txt, line)) {
             fclose(txt);
             fclose(qry);
             return 0;

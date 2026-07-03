@@ -4,6 +4,7 @@
 #include "output.h"
 #include "qry.h"
 #include "registers.h"
+#include "road_components.h"
 #include "via.h"
 
 #include <stdio.h>
@@ -18,6 +19,7 @@ int main(int argc, char **argv) {
     Geo *geo;
     Via *via = NULL;
     Registers *registers = NULL;
+    RoadComponents *road_components = NULL;
 
     if (args == NULL) {
         fputs("Erro: memoria insuficiente\n", stderr);
@@ -115,8 +117,14 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        if (!qry_process(file_paths_query_path(paths), geo, via == NULL ? NULL : via_graph(via), registers, file_paths_txt_path(paths))) {
+        if (!qry_process(file_paths_query_path(paths),
+                         geo,
+                         via == NULL ? NULL : via_graph(via),
+                         registers,
+                         &road_components,
+                         file_paths_txt_path(paths))) {
             fprintf(stderr, "Erro: %s\n", qry_error());
+            road_components_destroy(road_components);
             registers_destroy(registers);
             via_destroy(via);
             geo_destroy(geo);
@@ -126,8 +134,13 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (!output_write_svg_with_graph(file_paths_svg_path(paths), geo, via == NULL ? NULL : via_graph(via), registers)) {
+    if (!output_write_svg_with_graph(file_paths_svg_path(paths),
+                                     geo,
+                                     via == NULL ? NULL : via_graph(via),
+                                     registers,
+                                     road_components)) {
         fprintf(stderr, "Erro: %s\n", output_error());
+        road_components_destroy(road_components);
         registers_destroy(registers);
         via_destroy(via);
         geo_destroy(geo);
@@ -136,6 +149,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    road_components_destroy(road_components);
     registers_destroy(registers);
     via_destroy(via);
     geo_destroy(geo);
@@ -143,5 +157,3 @@ int main(int argc, char **argv) {
     args_destroy(args);
     return 0;
 }
-
-
