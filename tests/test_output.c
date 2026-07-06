@@ -2,6 +2,8 @@
 #include "graph.h"
 #include "output.h"
 #include "registers.h"
+#include "road_routes.h"
+#include "route.h"
 #include "unity.h"
 
 #include <stdio.h>
@@ -123,7 +125,7 @@ static void test_writes_svg_graph_edges(void) {
     graph_add_vertex(graph, "v2", 30.0, 40.0);
     graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
 
-    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, NULL, NULL));
+    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, NULL, NULL, NULL));
     TEST_ASSERT_NULL(output_error());
 
     content = read_file(test_svg_path);
@@ -151,7 +153,7 @@ static void test_writes_svg_road_component_boxes(void) {
     components = road_components_find_slow(graph, 10.0);
     TEST_ASSERT_NOT_NULL(components);
 
-    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, components, NULL));
+    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, components, NULL, NULL));
     TEST_ASSERT_NULL(output_error());
 
     content = read_file(test_svg_path);
@@ -178,7 +180,7 @@ static void test_writes_svg_road_expansion(void) {
     expansion = road_expansion_apply(graph, 10.0);
     TEST_ASSERT_NOT_NULL(expansion);
 
-    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, NULL, expansion));
+    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, NULL, expansion, NULL));
     TEST_ASSERT_NULL(output_error());
 
     content = read_file(test_svg_path);
@@ -190,6 +192,37 @@ static void test_writes_svg_road_expansion(void) {
     graph_destroy(graph);
     geo_destroy(geo);
 }
+static void test_writes_svg_routes(void) {
+    Geo *geo = load_sample_geo();
+    Graph *graph = graph_create();
+    Route *route;
+    RoadRoutes *routes = road_routes_create();
+    char *content;
+
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(graph);
+    TEST_ASSERT_NOT_NULL(routes);
+    graph_add_vertex(graph, "v1", 10.0, 20.0);
+    graph_add_vertex(graph, "v2", 30.0, 40.0);
+    graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
+    route = route_shortest_path(graph, graph_find_vertex(graph, "v1"), graph_find_vertex(graph, "v2"), ROUTE_METRIC_LENGTH);
+    TEST_ASSERT_NOT_NULL(route);
+    TEST_ASSERT_TRUE(road_routes_add(routes, route, "purple", "menor caminho"));
+
+    TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, NULL, NULL, routes));
+    TEST_ASSERT_NULL(output_error());
+
+    content = read_file(test_svg_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"purple\" stroke-width=\"3.00\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, ">menor caminho Rua_A</title>"));
+
+    free(content);
+    route_destroy(route);
+    road_routes_destroy(routes);
+    graph_destroy(graph);
+    geo_destroy(geo);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_writes_txt_with_block_summary);
@@ -198,5 +231,6 @@ int main(void) {
     RUN_TEST(test_writes_svg_graph_edges);
     RUN_TEST(test_writes_svg_road_component_boxes);
     RUN_TEST(test_writes_svg_road_expansion);
+    RUN_TEST(test_writes_svg_routes);
     return UNITY_END();
 }

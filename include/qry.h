@@ -6,6 +6,7 @@
 #include "registers.h"
 #include "road_components.h"
 #include "road_expansion.h"
+#include "road_routes.h"
 
 int qry_process(const char *qry_path,
                 const Geo *geo,
@@ -13,6 +14,7 @@ int qry_process(const char *qry_path,
                 Registers *registers,
                 RoadComponents **road_components,
                 RoadExpansion **road_expansion,
+                RoadRoutes *road_routes,
                 const char *txt_path);
 const char *qry_error(void);
 

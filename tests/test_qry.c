@@ -4,6 +4,7 @@
 #include "registers.h"
 #include "road_components.h"
 #include "road_expansion.h"
+#include "road_routes.h"
 #include "unity.h"
 
 #include <stdio.h>
@@ -65,7 +66,7 @@ static void test_processes_address_query(void) {
     TEST_ASSERT_NULL(geo_error(geo));
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, NULL, registers, NULL, NULL, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, NULL, registers, NULL, NULL, NULL, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
     TEST_ASSERT_TRUE(registers_is_set(registers, 2));
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 90.0, registers_x(registers, 2));
@@ -92,7 +93,7 @@ static void test_reports_missing_cep(void) {
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, NULL, NULL, test_txt_path));
+    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, NULL, NULL, NULL, test_txt_path));
     TEST_ASSERT_NOT_NULL(qry_error());
     TEST_ASSERT_FALSE(registers_is_set(registers, 2));
 
@@ -124,7 +125,7 @@ static void test_processes_mvm_query(void) {
     graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
     graph_add_edge(graph, "v1", "v3", "cepR", "cepL", 90.0, 4.0, "Rua_B");
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, NULL, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, NULL, NULL, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
 
     from = graph_find_vertex(graph, "v1");
@@ -153,7 +154,7 @@ static void test_reports_mvm_without_graph(void) {
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, NULL, NULL, test_txt_path));
+    TEST_ASSERT_FALSE(qry_process(test_qry_path, geo, NULL, registers, NULL, NULL, NULL, test_txt_path));
     TEST_ASSERT_NOT_NULL(qry_error());
 
     registers_destroy(registers);
@@ -180,6 +181,7 @@ static void test_processes_path_query(void) {
     Geo *geo;
     Graph *graph;
     Registers *registers;
+    RoadRoutes *routes;
     char *content;
 
     write_file(test_geo_path, "q cep1 100 200 40 30\n");
@@ -189,13 +191,20 @@ static void test_processes_path_query(void) {
     geo = geo_load(test_geo_path);
     graph = create_path_graph();
     registers = registers_create();
+    routes = road_routes_create();
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(registers);
+    TEST_ASSERT_NOT_NULL(routes);
     TEST_ASSERT_TRUE(registers_set(registers, 1, 1.0, 0.0));
     TEST_ASSERT_TRUE(registers_set(registers, 2, 31.0, 0.0));
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, NULL, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, NULL, routes, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
+    TEST_ASSERT_EQUAL_INT(2, road_routes_count(routes));
+    TEST_ASSERT_EQUAL_STRING("red", road_routes_color(routes, 0));
+    TEST_ASSERT_EQUAL_STRING("blue", road_routes_color(routes, 1));
+    TEST_ASSERT_EQUAL_INT(2, road_routes_step_count(routes, 0));
+    TEST_ASSERT_EQUAL_INT(2, road_routes_step_count(routes, 1));
 
     content = read_file(test_txt_path);
     TEST_ASSERT_NOT_NULL(strstr(content, "p? R1 R2 red blue"));
@@ -203,6 +212,7 @@ static void test_processes_path_query(void) {
     TEST_ASSERT_NOT_NULL(strstr(content, "caminho mais rapido: a -> c -> d | peso 2.00 | ruas: Rua_AC ate c (30.00) ; Rua_CD ate d (30.00)"));
 
     free(content);
+    road_routes_destroy(routes);
     registers_destroy(registers);
     graph_destroy(graph);
     geo_destroy(geo);
@@ -240,7 +250,7 @@ static void test_processes_regs_query(void) {
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, &components, NULL, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, &components, NULL, NULL, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
     TEST_ASSERT_NOT_NULL(components);
     TEST_ASSERT_EQUAL_INT(2, road_components_count(components));
@@ -276,7 +286,7 @@ static void test_processes_exp_query(void) {
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(registers);
 
-    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, &expansion, test_txt_path));
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, &expansion, NULL, test_txt_path));
     TEST_ASSERT_NULL(qry_error());
     TEST_ASSERT_NOT_NULL(expansion);
     TEST_ASSERT_EQUAL_INT(2, road_expansion_count(expansion));

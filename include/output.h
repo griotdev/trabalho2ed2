@@ -6,6 +6,7 @@
 #include "registers.h"
 #include "road_components.h"
 #include "road_expansion.h"
+#include "road_routes.h"
 
 int output_write_txt(const char *path, const Geo *geo);
 int output_write_svg(const char *path, const Geo *geo);
@@ -15,7 +16,8 @@ int output_write_svg_with_graph(const char *path,
                                 const Graph *graph,
                                 const Registers *registers,
                                 const RoadComponents *road_components,
-                                const RoadExpansion *road_expansion);
+                                const RoadExpansion *road_expansion,
+                                const RoadRoutes *road_routes);
 const char *output_error(void);
 
 #endif

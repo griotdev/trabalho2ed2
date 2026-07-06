@@ -233,7 +233,7 @@ static void write_route(FILE *txt, const Graph *graph, const char *label, const 
     fputc('\n', txt);
 }
 
-static int process_path_query(Graph *graph, Registers *registers, FILE *txt, const char *line) {
+static int process_path_query(Graph *graph, Registers *registers, RoadRoutes *road_routes, FILE *txt, const char *line) {
     char origin_text[16];
     char destination_text[16];
     char shortest_color[32];
@@ -283,6 +283,16 @@ static int process_path_query(Graph *graph, Registers *registers, FILE *txt, con
     write_route(txt, graph, "menor caminho", shortest);
     write_route(txt, graph, "caminho mais rapido", fastest);
 
+    if ((route_found(shortest) && road_routes != NULL &&
+         !road_routes_add(road_routes, shortest, shortest_color, "menor caminho")) ||
+        (route_found(fastest) && road_routes != NULL &&
+         !road_routes_add(road_routes, fastest, fastest_color, "caminho mais rapido"))) {
+        route_destroy(shortest);
+        route_destroy(fastest);
+        set_error("Nao foi possivel registrar rota em p?");
+        return 0;
+    }
+
     route_destroy(shortest);
     route_destroy(fastest);
     return 1;
@@ -293,6 +303,7 @@ static int process_line(const Geo *geo,
                         Registers *registers,
                         RoadComponents **road_components,
                         RoadExpansion **road_expansion,
+                        RoadRoutes *road_routes,
                         FILE *txt,
                         const char *line) {
     char command[16];
@@ -318,7 +329,7 @@ static int process_line(const Geo *geo,
     }
 
     if (strcmp(command, "p?") == 0) {
-        return process_path_query(graph, registers, txt, line);
+        return process_path_query(graph, registers, road_routes, txt, line);
     }
 
     return 1;
@@ -330,6 +341,7 @@ int qry_process(const char *qry_path,
                 Registers *registers,
                 RoadComponents **road_components,
                 RoadExpansion **road_expansion,
+                RoadRoutes *road_routes,
                 const char *txt_path) {
     FILE *qry;
     FILE *txt;
@@ -356,7 +368,7 @@ int qry_process(const char *qry_path,
     }
 
     while (fgets(line, sizeof(line), qry) != NULL) {
-        if (!process_line(geo, graph, registers, road_components, road_expansion, txt, line)) {
+        if (!process_line(geo, graph, registers, road_components, road_expansion, road_routes, txt, line)) {
             fclose(txt);
             fclose(qry);
             return 0;

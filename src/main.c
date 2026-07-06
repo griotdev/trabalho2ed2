@@ -6,6 +6,7 @@
 #include "registers.h"
 #include "road_components.h"
 #include "road_expansion.h"
+#include "road_routes.h"
 #include "via.h"
 
 #include <stdio.h>
@@ -22,6 +23,7 @@ int main(int argc, char **argv) {
     Registers *registers = NULL;
     RoadComponents *road_components = NULL;
     RoadExpansion *road_expansion = NULL;
+    RoadRoutes *road_routes = NULL;
 
     if (args == NULL) {
         fputs("Erro: memoria insuficiente\n", stderr);
@@ -110,7 +112,9 @@ int main(int argc, char **argv) {
 
     if (file_paths_query_path(paths) != NULL) {
         registers = registers_create();
-        if (registers == NULL) {
+        road_routes = road_routes_create();
+        if (registers == NULL || road_routes == NULL) {
+            road_routes_destroy(road_routes);
             fputs("Erro: memoria insuficiente\n", stderr);
             via_destroy(via);
             geo_destroy(geo);
@@ -125,8 +129,10 @@ int main(int argc, char **argv) {
                          registers,
                          &road_components,
                          &road_expansion,
+                         road_routes,
                          file_paths_txt_path(paths))) {
             fprintf(stderr, "Erro: %s\n", qry_error());
+            road_routes_destroy(road_routes);
             road_expansion_destroy(road_expansion);
             road_components_destroy(road_components);
             registers_destroy(registers);
@@ -143,8 +149,10 @@ int main(int argc, char **argv) {
                                      via == NULL ? NULL : via_graph(via),
                                      registers,
                                      road_components,
-                                     road_expansion)) {
+                                     road_expansion,
+                                     road_routes)) {
         fprintf(stderr, "Erro: %s\n", output_error());
+        road_routes_destroy(road_routes);
         road_expansion_destroy(road_expansion);
         road_components_destroy(road_components);
         registers_destroy(registers);
@@ -155,6 +163,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
+    road_routes_destroy(road_routes);
     road_expansion_destroy(road_expansion);
     road_components_destroy(road_components);
     registers_destroy(registers);

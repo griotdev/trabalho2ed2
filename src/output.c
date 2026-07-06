@@ -111,6 +111,38 @@ static void write_svg_road_expansion(FILE *file, const Graph *graph, const RoadE
         }
     }
 }
+
+static void write_svg_road_routes(FILE *file, const Graph *graph, const RoadRoutes *routes) {
+    int i;
+
+    if (graph == NULL || routes == NULL) {
+        return;
+    }
+
+    for (i = 0; i < road_routes_count(routes); i++) {
+        int step;
+        const char *color = road_routes_color(routes, i);
+        const char *label = road_routes_label(routes, i);
+
+        for (step = 0; step < road_routes_step_count(routes, i); step++) {
+            int from = road_routes_step_from(routes, i, step);
+            int to = road_routes_step_to(routes, i, step);
+            int edge_index = road_routes_step_edge_index(routes, i, step);
+
+            if (from >= 0 && to >= 0) {
+                fprintf(file,
+                        "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"%s\" stroke-width=\"3.00\" stroke-opacity=\"0.85\" stroke-linecap=\"round\">\n",
+                        graph_vertex_x(graph, from),
+                        graph_vertex_y(graph, from),
+                        graph_vertex_x(graph, to),
+                        graph_vertex_y(graph, to),
+                        color == NULL ? "black" : color);
+                fprintf(file, "    <title>%s %s</title>\n", label == NULL ? "rota" : label, graph_edge_name(graph, from, edge_index));
+                fputs("  </line>\n", file);
+            }
+        }
+    }
+}
 static void write_svg_road_components(FILE *file, const RoadComponents *components) {
     int i;
 
@@ -192,11 +224,11 @@ int output_write_txt(const char *path, const Geo *geo) {
 }
 
 int output_write_svg(const char *path, const Geo *geo) {
-    return output_write_svg_with_graph(path, geo, NULL, NULL, NULL, NULL);
+    return output_write_svg_with_graph(path, geo, NULL, NULL, NULL, NULL, NULL);
 }
 
 int output_write_svg_with_registers(const char *path, const Geo *geo, const Registers *registers) {
-    return output_write_svg_with_graph(path, geo, NULL, registers, NULL, NULL);
+    return output_write_svg_with_graph(path, geo, NULL, registers, NULL, NULL, NULL);
 }
 
 int output_write_svg_with_graph(const char *path,
@@ -204,7 +236,8 @@ int output_write_svg_with_graph(const char *path,
                                 const Graph *graph,
                                 const Registers *registers,
                                 const RoadComponents *road_components,
-                                const RoadExpansion *road_expansion) {
+                                const RoadExpansion *road_expansion,
+                                const RoadRoutes *road_routes) {
     FILE *file;
 
     if (!open_output(&file, path)) {
@@ -216,6 +249,7 @@ int output_write_svg_with_graph(const char *path,
     write_svg_graph(file, graph);
     write_svg_road_components(file, road_components);
     write_svg_road_expansion(file, graph, road_expansion);
+    write_svg_road_routes(file, graph, road_routes);
     write_svg_registers(file, registers);
     fputs("</svg>\n", file);
 
