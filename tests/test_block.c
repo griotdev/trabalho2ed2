@@ -46,6 +46,19 @@ static void test_calculates_address_from_southeast_anchor(void) {
     block_destroy(block);
 }
 
+static void test_rejects_address_number_outside_face(void) {
+    Block *block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
+    double x = 0.0;
+    double y = 0.0;
+
+    TEST_ASSERT_NOT_NULL(block);
+    TEST_ASSERT_FALSE(block_address_point(block, 'S', 40.01, &x, &y));
+    TEST_ASSERT_FALSE(block_address_point(block, 'N', 40.01, &x, &y));
+    TEST_ASSERT_FALSE(block_address_point(block, 'L', 30.01, &x, &y));
+    TEST_ASSERT_FALSE(block_address_point(block, 'O', 30.01, &x, &y));
+
+    block_destroy(block);
+}
 static void test_rejects_invalid_face(void) {
     Block *block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
     double x = 0.0;
@@ -61,6 +74,7 @@ int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_preserves_block_fields);
     RUN_TEST(test_calculates_address_from_southeast_anchor);
+    RUN_TEST(test_rejects_address_number_outside_face);
     RUN_TEST(test_rejects_invalid_face);
     return UNITY_END();
 }

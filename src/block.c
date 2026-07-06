@@ -162,18 +162,30 @@ int block_address_point(const Block *block, char face, double number, double *x,
 
     switch (normalized_face) {
         case 'S':
+            if (number > data->width) {
+                return 0;
+            }
             *x = data->x - number;
             *y = data->y;
             return 1;
         case 'N':
+            if (number > data->width) {
+                return 0;
+            }
             *x = data->x - number;
             *y = data->y + data->height;
             return 1;
         case 'L':
+            if (number > data->height) {
+                return 0;
+            }
             *x = data->x;
             *y = data->y + number;
             return 1;
         case 'O':
+            if (number > data->height) {
+                return 0;
+            }
             *x = data->x - data->width;
             *y = data->y + number;
             return 1;
