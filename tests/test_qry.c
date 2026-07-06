@@ -218,6 +218,45 @@ static void test_processes_path_query(void) {
     geo_destroy(geo);
 }
 
+static void test_processes_unreachable_path_query(void) {
+    Geo *geo;
+    Graph *graph;
+    Registers *registers;
+    RoadRoutes *routes;
+    char *content;
+
+    write_file(test_geo_path, "q cep1 100 200 40 30\n");
+    write_file(test_qry_path, "p? R1 R2 red blue\n");
+    write_file(test_txt_path, "base\n");
+
+    geo = geo_load(test_geo_path);
+    graph = graph_create();
+    registers = registers_create();
+    routes = road_routes_create();
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(graph);
+    TEST_ASSERT_NOT_NULL(registers);
+    TEST_ASSERT_NOT_NULL(routes);
+    graph_add_vertex(graph, "a", 0.0, 0.0);
+    graph_add_vertex(graph, "b", 100.0, 0.0);
+    TEST_ASSERT_TRUE(registers_set(registers, 1, 0.0, 0.0));
+    TEST_ASSERT_TRUE(registers_set(registers, 2, 100.0, 0.0));
+
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, NULL, NULL, routes, test_txt_path));
+    TEST_ASSERT_NULL(qry_error());
+    TEST_ASSERT_EQUAL_INT(0, road_routes_count(routes));
+
+    content = read_file(test_txt_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "p? R1 R2 red blue"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "menor caminho: Destino inacessivel"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "caminho mais rapido: Destino inacessivel"));
+
+    free(content);
+    road_routes_destroy(routes);
+    registers_destroy(registers);
+    graph_destroy(graph);
+    geo_destroy(geo);
+}
 static Graph *create_regs_graph(void) {
     Graph *graph = graph_create();
 
@@ -312,6 +351,7 @@ int main(void) {
     RUN_TEST(test_processes_mvm_query);
     RUN_TEST(test_reports_mvm_without_graph);
     RUN_TEST(test_processes_path_query);
+    RUN_TEST(test_processes_unreachable_path_query);
     RUN_TEST(test_processes_regs_query);
     RUN_TEST(test_processes_exp_query);
     return UNITY_END();
