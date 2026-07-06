@@ -199,8 +199,8 @@ static void test_processes_path_query(void) {
 
     content = read_file(test_txt_path);
     TEST_ASSERT_NOT_NULL(strstr(content, "p? R1 R2 red blue"));
-    TEST_ASSERT_NOT_NULL(strstr(content, "menor caminho: a -> b -> d | peso 20.00"));
-    TEST_ASSERT_NOT_NULL(strstr(content, "caminho mais rapido: a -> c -> d | peso 2.00"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "menor caminho: a -> b -> d | peso 20.00 | ruas: Rua_AB ate b (10.00) ; Rua_BD ate d (10.00)"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "caminho mais rapido: a -> c -> d | peso 2.00 | ruas: Rua_AC ate c (30.00) ; Rua_CD ate d (30.00)"));
 
     free(content);
     registers_destroy(registers);

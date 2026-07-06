@@ -176,6 +176,43 @@ static int nearest_registered_vertex(const Graph *graph, const Registers *regist
     return graph_nearest_vertex(graph, registers_x(registers, reg), registers_y(registers, reg));
 }
 
+static void write_route_street_summary(FILE *txt, const Graph *graph, const Route *route) {
+    int edge_count = route_edge_count(route);
+    int start = 0;
+
+    if (edge_count == 0) {
+        fprintf(txt, " | ruas: origem e destino coincidem");
+        return;
+    }
+
+    fprintf(txt, " | ruas: ");
+    while (start < edge_count) {
+        const char *street = graph_edge_name(graph, route_edge_from(route, start), route_edge_index(route, start));
+        double total_length = 0.0;
+        int end = start;
+
+        while (end < edge_count) {
+            const char *current = graph_edge_name(graph, route_edge_from(route, end), route_edge_index(route, end));
+            if (strcmp(street, current) != 0) {
+                break;
+            }
+
+            total_length += graph_edge_length(graph, route_edge_from(route, end), route_edge_index(route, end));
+            end++;
+        }
+
+        if (start > 0) {
+            fprintf(txt, " ; ");
+        }
+        fprintf(txt,
+                "%s ate %s (%.2f)",
+                street,
+                graph_vertex_id(graph, route_vertex_at(route, end)),
+                total_length);
+        start = end;
+    }
+}
+
 static void write_route(FILE *txt, const Graph *graph, const char *label, const Route *route) {
     int i;
 
@@ -191,7 +228,9 @@ static void write_route(FILE *txt, const Graph *graph, const char *label, const 
         }
         fprintf(txt, "%s", graph_vertex_id(graph, route_vertex_at(route, i)));
     }
-    fprintf(txt, " | peso %.2f\n", route_total_weight(route));
+    fprintf(txt, " | peso %.2f", route_total_weight(route));
+    write_route_street_summary(txt, graph, route);
+    fputc('\n', txt);
 }
 
 static int process_path_query(Graph *graph, Registers *registers, FILE *txt, const char *line) {
