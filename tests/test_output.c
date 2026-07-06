@@ -215,6 +215,11 @@ static void test_writes_svg_routes(void) {
     content = read_file(test_svg_path);
     TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"purple\" stroke-width=\"3.00\""));
     TEST_ASSERT_NOT_NULL(strstr(content, ">menor caminho Rua_A</title>"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<path id=\"rota-0\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<animateMotion dur=\"6s\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<mpath href=\"#rota-0\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, ">I</text>"));
+    TEST_ASSERT_NOT_NULL(strstr(content, ">F</text>"));
 
     free(content);
     route_destroy(route);

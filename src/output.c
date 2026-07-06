@@ -114,6 +114,7 @@ static void write_svg_road_expansion(FILE *file, const Graph *graph, const RoadE
 
 static void write_svg_road_routes(FILE *file, const Graph *graph, const RoadRoutes *routes) {
     int i;
+    int markers_written = 0;
 
     if (graph == NULL || routes == NULL) {
         return;
@@ -121,10 +122,23 @@ static void write_svg_road_routes(FILE *file, const Graph *graph, const RoadRout
 
     for (i = 0; i < road_routes_count(routes); i++) {
         int step;
+        int step_count = road_routes_step_count(routes, i);
+        int first_from;
+        int last_to;
         const char *color = road_routes_color(routes, i);
         const char *label = road_routes_label(routes, i);
 
-        for (step = 0; step < road_routes_step_count(routes, i); step++) {
+        if (step_count <= 0) {
+            continue;
+        }
+
+        first_from = road_routes_step_from(routes, i, 0);
+        last_to = road_routes_step_to(routes, i, step_count - 1);
+        if (first_from < 0 || last_to < 0) {
+            continue;
+        }
+
+        for (step = 0; step < step_count; step++) {
             int from = road_routes_step_from(routes, i, step);
             int to = road_routes_step_to(routes, i, step);
             int edge_index = road_routes_step_edge_index(routes, i, step);
@@ -140,6 +154,36 @@ static void write_svg_road_routes(FILE *file, const Graph *graph, const RoadRout
                 fprintf(file, "    <title>%s %s</title>\n", label == NULL ? "rota" : label, graph_edge_name(graph, from, edge_index));
                 fputs("  </line>\n", file);
             }
+        }
+
+        fprintf(file,
+                "  <path id=\"rota-%d\" d=\"M %.2f %.2f",
+                i,
+                graph_vertex_x(graph, first_from),
+                graph_vertex_y(graph, first_from));
+        for (step = 0; step < step_count; step++) {
+            int to = road_routes_step_to(routes, i, step);
+            if (to >= 0) {
+                fprintf(file, " L %.2f %.2f", graph_vertex_x(graph, to), graph_vertex_y(graph, to));
+            }
+        }
+        fputs("\" fill=\"none\" stroke=\"none\" />\n", file);
+        fprintf(file, "  <circle r=\"3.00\" fill=\"%s\">\n", color == NULL ? "black" : color);
+        fprintf(file, "    <animateMotion dur=\"6s\" repeatCount=\"indefinite\">\n");
+        fprintf(file, "      <mpath href=\"#rota-%d\" />\n", i);
+        fprintf(file, "    </animateMotion>\n");
+        fputs("  </circle>\n", file);
+
+        if (!markers_written) {
+            fprintf(file,
+                    "  <text x=\"%.2f\" y=\"%.2f\" fill=\"black\" font-weight=\"bold\">I</text>\n",
+                    graph_vertex_x(graph, first_from) + 4.0,
+                    graph_vertex_y(graph, first_from) - 4.0);
+            fprintf(file,
+                    "  <text x=\"%.2f\" y=\"%.2f\" fill=\"black\" font-weight=\"bold\">F</text>\n",
+                    graph_vertex_x(graph, last_to) + 4.0,
+                    graph_vertex_y(graph, last_to) - 4.0);
+            markers_written = 1;
         }
     }
 }
