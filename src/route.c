@@ -123,9 +123,13 @@ Route *route_shortest_path(const Graph *graph, int origin, int destination, int 
     int i;
     RouteData *route;
 
-    count = graph_vertex_count(graph);
-    if (graph == NULL || origin < 0 || destination < 0 || origin >= count || destination >= count ||
+    if (graph == NULL || origin < 0 || destination < 0 ||
         (metric != ROUTE_METRIC_LENGTH && metric != ROUTE_METRIC_TIME)) {
+        return NULL;
+    }
+
+    count = graph_vertex_count(graph);
+    if (origin >= count || destination >= count) {
         return NULL;
     }
 

@@ -99,11 +99,22 @@ static void test_origin_can_equal_destination(void) {
     graph_destroy(graph);
 }
 
+static void test_rejects_invalid_inputs(void) {
+    Graph *graph = create_route_graph();
+
+    TEST_ASSERT_NULL(route_shortest_path(NULL, 0, 1, ROUTE_METRIC_LENGTH));
+    TEST_ASSERT_NULL(route_shortest_path(graph, -1, 1, ROUTE_METRIC_LENGTH));
+    TEST_ASSERT_NULL(route_shortest_path(graph, 0, -1, ROUTE_METRIC_LENGTH));
+    TEST_ASSERT_NULL(route_shortest_path(graph, 0, 1, 99));
+
+    graph_destroy(graph);
+}
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(test_finds_shortest_by_length);
     RUN_TEST(test_finds_fastest_by_time);
     RUN_TEST(test_reports_unreachable_destination);
     RUN_TEST(test_origin_can_equal_destination);
+    RUN_TEST(test_rejects_invalid_inputs);
     return UNITY_END();
 }
