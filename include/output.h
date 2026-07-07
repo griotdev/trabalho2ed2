@@ -8,9 +8,16 @@
 #include "road_expansion.h"
 #include "road_routes.h"
 
+/* Gera relatorio textual basico das quadras. Retorna 1 em sucesso. */
 int output_write_txt(const char *path, const Geo geo);
+
+/* Gera SVG somente com as quadras. */
 int output_write_svg(const char *path, const Geo geo);
+
+/* Gera SVG com quadras e marcadores de registradores. */
 int output_write_svg_with_registers(const char *path, const Geo geo, const Registers registers);
+
+/* Gera SVG completo: quadras, grafo, registradores, componentes, expansoes e rotas. */
 int output_write_svg_with_graph(const char *path,
                                 const Geo geo,
                                 const Graph graph,
@@ -18,6 +25,8 @@ int output_write_svg_with_graph(const char *path,
                                 const RoadComponents road_components,
                                 const RoadExpansion road_expansion,
                                 const RoadRoutes road_routes);
+
+/* Mensagem do ultimo erro de escrita, ou NULL quando nao ha erro. */
 const char *output_error(void);
 
 #endif

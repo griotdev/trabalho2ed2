@@ -8,6 +8,9 @@
 #include "road_expansion.h"
 #include "road_routes.h"
 
+/* Processa comandos QRY e acrescenta as respostas no TXT.
+ * road_components e road_expansion sao parametros de saida opcionais.
+ */
 int qry_process(const char *qry_path,
                 const Geo geo,
                 Graph graph,
@@ -16,6 +19,8 @@ int qry_process(const char *qry_path,
                 RoadExpansion *road_expansion,
                 RoadRoutes road_routes,
                 const char *txt_path);
+
+/* Mensagem do ultimo erro de processamento QRY, ou NULL quando nao ha erro. */
 const char *qry_error(void);
 
 #endif
