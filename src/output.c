@@ -367,22 +367,11 @@ static void write_svg_registers(FILE *file, const Registers registers) {
 
 int output_write_txt(const char *path, const Geo geo) {
     FILE *file;
-    int i;
+
+    (void)geo;
 
     if (!open_output(&file, path)) {
         return 0;
-    }
-
-    fprintf(file, "Quadras: %d\n", geo_block_count(geo));
-    for (i = 0; i < geo_block_count(geo); i++) {
-        const Block block = geo_block_at(geo, i);
-        fprintf(file,
-                "q %s %.2f %.2f %.2f %.2f\n",
-                block_cep(block),
-                block_x(block),
-                block_y(block),
-                block_width(block),
-                block_height(block));
     }
 
     if (fclose(file) != 0) {

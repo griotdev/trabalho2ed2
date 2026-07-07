@@ -8,7 +8,7 @@
 #include "road_expansion.h"
 #include "road_routes.h"
 
-/* Gera relatorio textual basico das quadras. Retorna 1 em sucesso. */
+/* Cria/limpa o arquivo TXT de saida. As respostas de QRY sao acrescentadas por qry_process. */
 int output_write_txt(const char *path, const Geo geo);
 
 /* Gera SVG somente com as quadras. */

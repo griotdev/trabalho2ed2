@@ -73,7 +73,8 @@ static void test_processes_address_query(void) {
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 200.0, registers_y(registers, 2));
 
     content = read_file(test_txt_path);
-    TEST_ASSERT_NOT_NULL(strstr(content, "@o? R2 cep1 S 10.00 -> 90.00 200.00"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "base"));
+    TEST_ASSERT_NULL(strstr(content, "@o?"));
 
     free(content);
     registers_destroy(registers);
@@ -133,7 +134,8 @@ static void test_processes_mvm_query(void) {
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 4.0, graph_edge_speed(graph, from, 1));
 
     content = read_file(test_txt_path);
-    TEST_ASSERT_NOT_NULL(strstr(content, "mvm 12.00 0.00 0.00 30.00 30.00 -> 1 arestas atualizadas"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "base"));
+    TEST_ASSERT_NULL(strstr(content, "arestas atualizadas"));
 
     free(content);
     registers_destroy(registers);
@@ -208,8 +210,15 @@ static void test_processes_path_query(void) {
 
     content = read_file(test_txt_path);
     TEST_ASSERT_NOT_NULL(strstr(content, "p? R1 R2 red blue"));
-    TEST_ASSERT_NOT_NULL(strstr(content, "menor caminho: a -> b -> d | peso 20.00 | ruas: Rua_AB ate b (10.00) ; Rua_BD ate d (10.00)"));
-    TEST_ASSERT_NOT_NULL(strstr(content, "caminho mais rapido: a -> c -> d | peso 2.00 | ruas: Rua_AC ate c (30.00) ; Rua_CD ate d (30.00)"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Percurso mais curto:"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Origem: R1"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Destino: R2"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Siga na direcao leste pela Rua_AB por 10.00 metros ate b."));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Siga na direcao leste pela Rua_BD por 10.00 metros ate d."));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Percurso mais rapido:"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Siga na direcao leste pela Rua_AC por 30.00 metros ate c."));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Siga na direcao leste pela Rua_CD por 30.00 metros ate d."));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Destino alcancado em R2."));
 
     free(content);
     road_routes_destroy(routes);
@@ -248,8 +257,9 @@ static void test_processes_unreachable_path_query(void) {
 
     content = read_file(test_txt_path);
     TEST_ASSERT_NOT_NULL(strstr(content, "p? R1 R2 red blue"));
-    TEST_ASSERT_NOT_NULL(strstr(content, "menor caminho: Destino inacessivel"));
-    TEST_ASSERT_NOT_NULL(strstr(content, "caminho mais rapido: Destino inacessivel"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Percurso mais curto:"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Percurso mais rapido:"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Destino inacessivel."));
 
     free(content);
     road_routes_destroy(routes);
@@ -299,7 +309,8 @@ static void test_processes_regs_query(void) {
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 130.0, road_components_max_y(components, 1));
 
     content = read_file(test_txt_path);
-    TEST_ASSERT_NOT_NULL(strstr(content, "regs 30.00 -> 2 componentes fortemente conexos"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "regs 30.00"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "Numero de componentes fortemente conexos: 2"));
 
     free(content);
     road_components_destroy(components);
@@ -338,7 +349,8 @@ static void test_processes_exp_query(void) {
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 1.5, graph_edge_speed(graph, b, 0));
 
     content = read_file(test_txt_path);
-    TEST_ASSERT_NOT_NULL(strstr(content, "exp 30.00 -> 2 arestas ampliadas"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "base"));
+    TEST_ASSERT_NULL(strstr(content, "arestas ampliadas"));
 
     free(content);
     road_expansion_destroy(expansion);

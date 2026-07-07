@@ -31,6 +31,38 @@ static int parse_register(const char *text) {
     return (int)value;
 }
 
+static void direction_name(const Graph graph, int from, int to, char *buffer, size_t size) {
+    double x1 = graph_vertex_x(graph, from);
+    double y1 = graph_vertex_y(graph, from);
+    double x2 = graph_vertex_x(graph, to);
+    double y2 = graph_vertex_y(graph, to);
+    const double epsilon = 0.000001;
+    const char *vertical = NULL;
+    const char *horizontal = NULL;
+
+    if (y2 > y1 + epsilon) {
+        vertical = "sul";
+    } else if (y2 < y1 - epsilon) {
+        vertical = "norte";
+    }
+
+    if (x2 > x1 + epsilon) {
+        horizontal = "leste";
+    } else if (x2 < x1 - epsilon) {
+        horizontal = "oeste";
+    }
+
+    if (vertical != NULL && horizontal != NULL) {
+        snprintf(buffer, size, "%s-%s", vertical, horizontal);
+    } else if (vertical != NULL) {
+        snprintf(buffer, size, "%s", vertical);
+    } else if (horizontal != NULL) {
+        snprintf(buffer, size, "%s", horizontal);
+    } else {
+        snprintf(buffer, size, "sem deslocamento");
+    }
+}
+
 static int process_address_query(const Geo geo, Registers registers, FILE *txt, const char *line) {
     Block block;
     char reg_text[16];
@@ -68,7 +100,7 @@ static int process_address_query(const Geo geo, Registers registers, FILE *txt, 
         return 0;
     }
 
-    fprintf(txt, "@o? R%d %s %c %.2f -> %.2f %.2f\n", reg, cep, face_text[0], number, x, y);
+    (void)txt;
     return 1;
 }
 
@@ -96,7 +128,8 @@ static int process_mvm(Graph graph, FILE *txt, const char *line) {
         return 0;
     }
 
-    fprintf(txt, "mvm %.2f %.2f %.2f %.2f %.2f -> %d arestas atualizadas\n", speed, x, y, width, height, updated);
+    (void)txt;
+    (void)updated;
     return 1;
 }
 
@@ -122,7 +155,8 @@ static int process_regs(Graph graph, RoadComponents *road_components, FILE *txt,
     }
 
     count = road_components_count(new_components);
-    fprintf(txt, "regs %.2f -> %d componentes fortemente conexos\n", speed_limit, count);
+    fprintf(txt, "regs %.2f\n", speed_limit);
+    fprintf(txt, "Numero de componentes fortemente conexos: %d\n\n", count);
 
     if (road_components != NULL) {
         road_components_destroy(*road_components);
@@ -156,7 +190,8 @@ static int process_exp(Graph graph, RoadExpansion *road_expansion, FILE *txt, co
     }
 
     count = road_expansion_count(new_expansion);
-    fprintf(txt, "exp %.2f -> %d arestas ampliadas\n", speed_limit, count);
+    (void)txt;
+    (void)count;
 
     if (road_expansion != NULL) {
         road_expansion_destroy(*road_expansion);
@@ -176,24 +211,43 @@ static int nearest_registered_vertex(const Graph graph, const Registers register
     return graph_nearest_vertex(graph, registers_x(registers, reg), registers_y(registers, reg));
 }
 
-static void write_route_street_summary(FILE *txt, const Graph graph, const Route route) {
+static void write_route_instructions(FILE *txt,
+                                     const Graph graph,
+                                     const char *label,
+                                     const char *origin_text,
+                                     const char *destination_text,
+                                     const Route route) {
     int edge_count = route_edge_count(route);
     int start = 0;
 
-    if (edge_count == 0) {
-        fprintf(txt, " | ruas: origem e destino coincidem");
+    fprintf(txt, "%s:\n", label);
+    fprintf(txt, "Origem: %s\n", origin_text);
+    fprintf(txt, "Destino: %s\n", destination_text);
+
+    if (!route_found(route)) {
+        fprintf(txt, "Destino inacessivel.\n\n");
         return;
     }
 
-    fprintf(txt, " | ruas: ");
+    if (edge_count == 0) {
+        fprintf(txt, "Origem e destino coincidem.\n");
+        fprintf(txt, "Destino alcancado em %s.\n\n", destination_text);
+        return;
+    }
+
     while (start < edge_count) {
         const char *street = graph_edge_name(graph, route_edge_from(route, start), route_edge_index(route, start));
+        char direction[32];
         double total_length = 0.0;
         int end = start;
 
+        direction_name(graph, route_edge_from(route, start), route_edge_to(route, start), direction, sizeof(direction));
         while (end < edge_count) {
             const char *current = graph_edge_name(graph, route_edge_from(route, end), route_edge_index(route, end));
-            if (strcmp(street, current) != 0) {
+            char current_direction[32];
+
+            direction_name(graph, route_edge_from(route, end), route_edge_to(route, end), current_direction, sizeof(current_direction));
+            if (strcmp(street, current) != 0 || strcmp(direction, current_direction) != 0) {
                 break;
             }
 
@@ -201,36 +255,17 @@ static void write_route_street_summary(FILE *txt, const Graph graph, const Route
             end++;
         }
 
-        if (start > 0) {
-            fprintf(txt, " ; ");
-        }
         fprintf(txt,
-                "%s ate %s (%.2f)",
+                "Siga na direcao %s pela %s por %.2f metros ate %s.\n",
+                direction,
                 street,
-                graph_vertex_id(graph, route_vertex_at(route, end)),
-                total_length);
+                total_length,
+                graph_vertex_id(graph, route_vertex_at(route, end)));
         start = end;
     }
-}
 
-static void write_route(FILE *txt, const Graph graph, const char *label, const Route route) {
-    int i;
-
-    fprintf(txt, "%s: ", label);
-    if (!route_found(route)) {
-        fprintf(txt, "Destino inacessivel\n");
-        return;
-    }
-
-    for (i = 0; i < route_vertex_count(route); i++) {
-        if (i > 0) {
-            fprintf(txt, " -> ");
-        }
-        fprintf(txt, "%s", graph_vertex_id(graph, route_vertex_at(route, i)));
-    }
-    fprintf(txt, " | peso %.2f", route_total_weight(route));
-    write_route_street_summary(txt, graph, route);
-    fputc('\n', txt);
+    fprintf(txt, "Destino alcancado em %s.\n", destination_text);
+    fprintf(txt, "Peso total: %.2f\n\n", route_total_weight(route));
 }
 
 static int process_path_query(Graph graph, Registers registers, RoadRoutes road_routes, FILE *txt, const char *line) {
@@ -280,8 +315,8 @@ static int process_path_query(Graph graph, Registers registers, RoadRoutes road_
     }
 
     fprintf(txt, "p? R%d R%d %s %s\n", origin_reg, destination_reg, shortest_color, fastest_color);
-    write_route(txt, graph, "menor caminho", shortest);
-    write_route(txt, graph, "caminho mais rapido", fastest);
+    write_route_instructions(txt, graph, "Percurso mais curto", origin_text, destination_text, shortest);
+    write_route_instructions(txt, graph, "Percurso mais rapido", origin_text, destination_text, fastest);
 
     if ((route_found(shortest) && road_routes != NULL &&
          !road_routes_add(road_routes, shortest, shortest_color, "menor caminho")) ||

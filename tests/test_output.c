@@ -55,7 +55,7 @@ static Geo load_sample_geo(void) {
     return geo_load(test_geo_path);
 }
 
-static void test_writes_txt_with_block_summary(void) {
+static void test_creates_empty_txt_report(void) {
     Geo geo = load_sample_geo();
     char *content;
 
@@ -65,8 +65,7 @@ static void test_writes_txt_with_block_summary(void) {
     TEST_ASSERT_NULL(output_error());
 
     content = read_file(test_txt_path);
-    TEST_ASSERT_NOT_NULL(strstr(content, "Quadras: 1"));
-    TEST_ASSERT_NOT_NULL(strstr(content, "q cep1 10.00 20.00 30.00 40.00"));
+    TEST_ASSERT_EQUAL_STRING("", content);
 
     free(content);
     geo_destroy(geo);
@@ -235,7 +234,7 @@ static void test_writes_svg_routes(void) {
 
 int main(void) {
     UNITY_BEGIN();
-    RUN_TEST(test_writes_txt_with_block_summary);
+    RUN_TEST(test_creates_empty_txt_report);
     RUN_TEST(test_writes_svg_rectangles_with_style);
     RUN_TEST(test_writes_svg_register_markers);
     RUN_TEST(test_writes_svg_graph_edges);
