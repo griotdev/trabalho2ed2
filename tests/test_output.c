@@ -217,11 +217,13 @@ static void test_writes_svg_routes(void) {
     TEST_ASSERT_NULL(output_error());
 
     content = read_file(test_svg_path);
-    TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"purple\" stroke-width=\"3.00\""));
-    TEST_ASSERT_NOT_NULL(strstr(content, ">menor caminho Rua_A</title>"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<g id=\"percursos\">"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"purple\" stroke-width=\"5.00\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "stroke-dasharray=\"14 8\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, ">menor caminho</title>"));
     TEST_ASSERT_NOT_NULL(strstr(content, "<path id=\"rota-0\""));
-    TEST_ASSERT_NOT_NULL(strstr(content, "<animateMotion dur=\"6s\""));
-    TEST_ASSERT_NOT_NULL(strstr(content, "<mpath href=\"#rota-0\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "attributeName=\"stroke-dashoffset\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<g id=\"marcadores\">"));
     TEST_ASSERT_NOT_NULL(strstr(content, ">I</text>"));
     TEST_ASSERT_NOT_NULL(strstr(content, ">F</text>"));
 

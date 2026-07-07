@@ -159,8 +159,15 @@ static int process_regs(Graph graph, RoadComponents *road_components, FILE *txt,
     fprintf(txt, "Numero de componentes fortemente conexos: %d\n\n", count);
 
     if (road_components != NULL) {
-        road_components_destroy(*road_components);
-        *road_components = new_components;
+        if (*road_components == NULL) {
+            *road_components = new_components;
+        } else if (road_components_append_all(*road_components, new_components)) {
+            road_components_destroy(new_components);
+        } else {
+            road_components_destroy(new_components);
+            set_error("Nao foi possivel acumular componentes em regs");
+            return 0;
+        }
     } else {
         road_components_destroy(new_components);
     }

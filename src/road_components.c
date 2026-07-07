@@ -309,6 +309,24 @@ void road_components_destroy(RoadComponents components) {
     free(data);
 }
 
+int road_components_append_all(RoadComponents destination, const RoadComponents source) {
+    RoadComponentsData *dest = destination;
+    const RoadComponentsData *src = source;
+    int i;
+
+    if (dest == NULL || src == NULL) {
+        return 0;
+    }
+
+    for (i = 0; i < src->count; i++) {
+        if (!append_component(dest, src->items[i])) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
 int road_components_count(const RoadComponents components) {
     const RoadComponentsData *data = components;
 

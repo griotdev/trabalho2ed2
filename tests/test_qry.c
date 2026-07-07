@@ -319,6 +319,33 @@ static void test_processes_regs_query(void) {
     geo_destroy(geo);
 }
 
+static void test_accumulates_multiple_regs_for_svg(void) {
+    Geo geo;
+    Graph graph;
+    Registers registers;
+    RoadComponents components = NULL;
+
+    write_file(test_geo_path, "q cep1 100 200 40 30\n");
+    write_file(test_qry_path, "regs 30\nregs 30\n");
+    write_file(test_txt_path, "base\n");
+
+    geo = geo_load(test_geo_path);
+    graph = create_regs_graph();
+    registers = registers_create();
+    TEST_ASSERT_NOT_NULL(geo);
+    TEST_ASSERT_NOT_NULL(registers);
+
+    TEST_ASSERT_TRUE(qry_process(test_qry_path, geo, graph, registers, &components, NULL, NULL, test_txt_path));
+    TEST_ASSERT_NULL(qry_error());
+    TEST_ASSERT_NOT_NULL(components);
+    TEST_ASSERT_EQUAL_INT(4, road_components_count(components));
+
+    road_components_destroy(components);
+    registers_destroy(registers);
+    graph_destroy(graph);
+    geo_destroy(geo);
+}
+
 static void test_processes_exp_query(void) {
     Geo geo;
     Graph graph;
@@ -367,6 +394,7 @@ int main(void) {
     RUN_TEST(test_processes_path_query);
     RUN_TEST(test_processes_unreachable_path_query);
     RUN_TEST(test_processes_regs_query);
+    RUN_TEST(test_accumulates_multiple_regs_for_svg);
     RUN_TEST(test_processes_exp_query);
     return UNITY_END();
 }

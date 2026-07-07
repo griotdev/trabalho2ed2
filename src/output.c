@@ -220,6 +220,7 @@ static void write_svg_road_expansion(FILE *file, const Graph graph, const RoadEx
         return;
     }
 
+    fputs("  <g id=\"expansoes\">\n", file);
     for (i = 0; i < road_expansion_count(expansion); i++) {
         int from = road_expansion_edge_from(expansion, i);
         int to = road_expansion_edge_to(expansion, i);
@@ -236,16 +237,20 @@ static void write_svg_road_expansion(FILE *file, const Graph graph, const RoadEx
             fputs("  </line>\n", file);
         }
     }
+    fputs("  </g>\n", file);
 }
 
 static void write_svg_road_routes(FILE *file, const Graph graph, const RoadRoutes routes) {
     int i;
     int markers_written = 0;
+    int marker_start = -1;
+    int marker_end = -1;
 
     if (graph == NULL || routes == NULL) {
         return;
     }
 
+    fputs("  <g id=\"percursos\">\n", file);
     for (i = 0; i < road_routes_count(routes); i++) {
         int step;
         int step_count = road_routes_step_count(routes, i);
@@ -253,6 +258,8 @@ static void write_svg_road_routes(FILE *file, const Graph graph, const RoadRoute
         int last_to;
         const char *color = road_routes_color(routes, i);
         const char *label = road_routes_label(routes, i);
+        double stroke_width = i % 2 == 0 ? 5.0 : 3.0;
+        const char *dash = i % 2 == 0 ? "14 8" : "8 6";
 
         if (step_count <= 0) {
             continue;
@@ -263,27 +270,14 @@ static void write_svg_road_routes(FILE *file, const Graph graph, const RoadRoute
         if (first_from < 0 || last_to < 0) {
             continue;
         }
-
-        for (step = 0; step < step_count; step++) {
-            int from = road_routes_step_from(routes, i, step);
-            int to = road_routes_step_to(routes, i, step);
-            int edge_index = road_routes_step_edge_index(routes, i, step);
-
-            if (from >= 0 && to >= 0) {
-                fprintf(file,
-                        "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"%s\" stroke-width=\"3.00\" stroke-opacity=\"0.85\" stroke-linecap=\"round\">\n",
-                        graph_vertex_x(graph, from),
-                        graph_vertex_y(graph, from),
-                        graph_vertex_x(graph, to),
-                        graph_vertex_y(graph, to),
-                        color == NULL ? "black" : color);
-                fprintf(file, "    <title>%s %s</title>\n", label == NULL ? "rota" : label, graph_edge_name(graph, from, edge_index));
-                fputs("  </line>\n", file);
-            }
+        if (!markers_written) {
+            marker_start = first_from;
+            marker_end = last_to;
+            markers_written = 1;
         }
 
         fprintf(file,
-                "  <path id=\"rota-%d\" d=\"M %.2f %.2f",
+                "    <path id=\"rota-%d\" d=\"M %.2f %.2f",
                 i,
                 graph_vertex_x(graph, first_from),
                 graph_vertex_y(graph, first_from));
@@ -293,24 +287,34 @@ static void write_svg_road_routes(FILE *file, const Graph graph, const RoadRoute
                 fprintf(file, " L %.2f %.2f", graph_vertex_x(graph, to), graph_vertex_y(graph, to));
             }
         }
-        fputs("\" fill=\"none\" stroke=\"none\" />\n", file);
-        fprintf(file, "  <circle r=\"3.00\" fill=\"%s\">\n", color == NULL ? "black" : color);
-        fprintf(file, "    <animateMotion dur=\"6s\" repeatCount=\"indefinite\">\n");
-        fprintf(file, "      <mpath href=\"#rota-%d\" />\n", i);
-        fprintf(file, "    </animateMotion>\n");
-        fputs("  </circle>\n", file);
+        fprintf(file,
+                "\" fill=\"none\" stroke=\"%s\" stroke-width=\"%.2f\" stroke-opacity=\"0.90\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"%s\">\n",
+                color == NULL ? "black" : color,
+                stroke_width,
+                dash);
+        fprintf(file, "      <title>%s</title>\n", label == NULL ? "rota" : label);
+        fputs("      <animate attributeName=\"stroke-dashoffset\" from=\"24\" to=\"0\" dur=\"1s\" repeatCount=\"indefinite\" />\n", file);
+        fputs("    </path>\n", file);
+    }
 
-        if (!markers_written) {
-            fprintf(file,
-                    "  <text x=\"%.2f\" y=\"%.2f\" fill=\"black\" font-weight=\"bold\">I</text>\n",
-                    graph_vertex_x(graph, first_from) + 4.0,
-                    graph_vertex_y(graph, first_from) - 4.0);
-            fprintf(file,
-                    "  <text x=\"%.2f\" y=\"%.2f\" fill=\"black\" font-weight=\"bold\">F</text>\n",
-                    graph_vertex_x(graph, last_to) + 4.0,
-                    graph_vertex_y(graph, last_to) - 4.0);
-            markers_written = 1;
-        }
+    fputs("  </g>\n", file);
+    if (marker_start >= 0 && marker_end >= 0) {
+        fprintf(file,
+                "  <g id=\"marcadores\">\n"
+                "    <rect x=\"%.2f\" y=\"%.2f\" width=\"16.00\" height=\"16.00\" fill=\"white\" stroke=\"black\" />\n"
+                "    <text x=\"%.2f\" y=\"%.2f\" fill=\"black\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">I</text>\n",
+                graph_vertex_x(graph, marker_start) - 8.0,
+                graph_vertex_y(graph, marker_start) - 20.0,
+                graph_vertex_x(graph, marker_start),
+                graph_vertex_y(graph, marker_start) - 8.0);
+        fprintf(file,
+                "    <rect x=\"%.2f\" y=\"%.2f\" width=\"16.00\" height=\"16.00\" fill=\"white\" stroke=\"black\" />\n"
+                "    <text x=\"%.2f\" y=\"%.2f\" fill=\"black\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">F</text>\n"
+                "  </g>\n",
+                graph_vertex_x(graph, marker_end) - 8.0,
+                graph_vertex_y(graph, marker_end) - 20.0,
+                graph_vertex_x(graph, marker_end),
+                graph_vertex_y(graph, marker_end) - 8.0);
     }
 }
 static void write_svg_road_components(FILE *file, const RoadComponents components) {
@@ -320,6 +324,7 @@ static void write_svg_road_components(FILE *file, const RoadComponents component
         return;
     }
 
+    fputs("  <g id=\"componentes-regs\">\n", file);
     for (i = 0; i < road_components_count(components); i++) {
         double min_x = road_components_min_x(components, i);
         double min_y = road_components_min_y(components, i);
@@ -328,8 +333,17 @@ static void write_svg_road_components(FILE *file, const RoadComponents component
         double width = max_x - min_x;
         double height = max_y - min_y;
 
+        if (width <= 0.0) {
+            min_x -= 2.0;
+            width = 4.0;
+        }
+        if (height <= 0.0) {
+            min_y -= 2.0;
+            height = 4.0;
+        }
+
         fprintf(file,
-                "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"%s\" fill-opacity=\"0.50\" stroke=\"%s\" stroke-width=\"2.00\" />\n",
+                "    <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"%s\" fill-opacity=\"0.50\" stroke=\"%s\" stroke-width=\"2.00\" />\n",
                 min_x,
                 min_y,
                 width,
@@ -337,6 +351,7 @@ static void write_svg_road_components(FILE *file, const RoadComponents component
                 component_color(i),
                 component_color(i));
     }
+    fputs("  </g>\n", file);
 }
 
 static void write_svg_registers(FILE *file, const Registers registers) {
