@@ -132,7 +132,7 @@ static void write_svg_header(FILE *file,
 
     collect_svg_bounds(&bounds, geo, graph, registers, road_components);
     if (!bounds.has_points) {
-        fputs("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0.00 0.00 100.00 100.00\">\n", file);
+        fputs("<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0.00 0.00 100.00 100.00\">\n", file);
         return;
     }
 
@@ -148,7 +148,7 @@ static void write_svg_header(FILE *file,
     }
 
     fprintf(file,
-            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"%.2f %.2f %.2f %.2f\">\n",
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"%.2f %.2f %.2f %.2f\">\n",
             x,
             y,
             width,
@@ -259,7 +259,6 @@ static void write_svg_road_routes(FILE *file, const Graph graph, const RoadRoute
         const char *color = road_routes_color(routes, i);
         const char *label = road_routes_label(routes, i);
         double stroke_width = i % 2 == 0 ? 5.0 : 3.0;
-        const char *dash = i % 2 == 0 ? "14 8" : "8 6";
 
         if (step_count <= 0) {
             continue;
@@ -288,13 +287,16 @@ static void write_svg_road_routes(FILE *file, const Graph graph, const RoadRoute
             }
         }
         fprintf(file,
-                "\" fill=\"none\" stroke=\"%s\" stroke-width=\"%.2f\" stroke-opacity=\"0.90\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-dasharray=\"%s\">\n",
+                "\" fill=\"none\" stroke=\"%s\" stroke-width=\"%.2f\" stroke-opacity=\"0.90\" stroke-linecap=\"round\" stroke-linejoin=\"round\">\n",
                 color == NULL ? "black" : color,
-                stroke_width,
-                dash);
+                stroke_width);
         fprintf(file, "      <title>%s</title>\n", label == NULL ? "rota" : label);
-        fputs("      <animate attributeName=\"stroke-dashoffset\" from=\"24\" to=\"0\" dur=\"1s\" repeatCount=\"indefinite\" />\n", file);
         fputs("    </path>\n", file);
+        fprintf(file, "    <circle r=\"4.00\" fill=\"%s\">\n", color == NULL ? "black" : color);
+        fprintf(file, "      <animateMotion dur=\"6s\" repeatCount=\"indefinite\">\n");
+        fprintf(file, "        <mpath href=\"#rota-%d\" xlink:href=\"#rota-%d\" />\n", i, i);
+        fputs("      </animateMotion>\n", file);
+        fputs("    </circle>\n", file);
     }
 
     fputs("  </g>\n", file);

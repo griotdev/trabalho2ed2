@@ -219,10 +219,13 @@ static void test_writes_svg_routes(void) {
     content = read_file(test_svg_path);
     TEST_ASSERT_NOT_NULL(strstr(content, "<g id=\"percursos\">"));
     TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"purple\" stroke-width=\"5.00\""));
-    TEST_ASSERT_NOT_NULL(strstr(content, "stroke-dasharray=\"14 8\""));
     TEST_ASSERT_NOT_NULL(strstr(content, ">menor caminho</title>"));
     TEST_ASSERT_NOT_NULL(strstr(content, "<path id=\"rota-0\""));
-    TEST_ASSERT_NOT_NULL(strstr(content, "attributeName=\"stroke-dashoffset\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<circle r=\"4.00\" fill=\"purple\">"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<animateMotion dur=\"6s\" repeatCount=\"indefinite\">"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "xmlns:xlink=\"http://www.w3.org/1999/xlink\""));
+    TEST_ASSERT_NOT_NULL(strstr(content, "<mpath href=\"#rota-0\" xlink:href=\"#rota-0\""));
+    TEST_ASSERT_NULL(strstr(content, "attributeName=\"stroke-dashoffset\""));
     TEST_ASSERT_NOT_NULL(strstr(content, "<g id=\"marcadores\">"));
     TEST_ASSERT_NOT_NULL(strstr(content, ">I</text>"));
     TEST_ASSERT_NOT_NULL(strstr(content, ">F</text>"));
