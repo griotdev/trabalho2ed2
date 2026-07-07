@@ -266,8 +266,10 @@ static Graph create_regs_graph(void) {
     graph_add_vertex(graph, "c", 100.0, 100.0);
     graph_add_vertex(graph, "d", 120.0, 130.0);
     graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 20.0, "Rua_AB");
+    graph_add_edge(graph, "b", "a", "cepR", "cepL", 10.0, 20.0, "Rua_BA");
     graph_add_edge(graph, "b", "c", "cepR", "cepL", 10.0, 80.0, "Rua_BC");
     graph_add_edge(graph, "c", "d", "cepR", "cepL", 10.0, 15.0, "Rua_CD");
+    graph_add_edge(graph, "d", "c", "cepR", "cepL", 10.0, 15.0, "Rua_DC");
 
     return graph;
 }
@@ -297,7 +299,7 @@ static void test_processes_regs_query(void) {
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 130.0, road_components_max_y(components, 1));
 
     content = read_file(test_txt_path);
-    TEST_ASSERT_NOT_NULL(strstr(content, "regs 30.00 -> 2 componentes conexos"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "regs 30.00 -> 2 componentes fortemente conexos"));
 
     free(content);
     road_components_destroy(components);

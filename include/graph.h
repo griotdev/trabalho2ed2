@@ -32,6 +32,8 @@ const char *graph_edge_left_cep(const Graph graph, int vertex_index, int edge_in
 double graph_edge_length(const Graph graph, int vertex_index, int edge_index);
 double graph_edge_speed(const Graph graph, int vertex_index, int edge_index);
 int graph_set_edge_speed(Graph graph, int vertex_index, int edge_index, double speed);
+int graph_edge_enabled(const Graph graph, int vertex_index, int edge_index);
+int graph_set_edge_enabled(Graph graph, int vertex_index, int edge_index, int enabled);
 int graph_update_speeds_in_rect(Graph graph, double speed, double x, double y, double width, double height);
 
 #endif

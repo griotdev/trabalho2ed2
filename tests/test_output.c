@@ -126,6 +126,7 @@ static void test_writes_svg_graph_edges(void) {
     graph_add_vertex(graph, "v1", 10.0, 20.0);
     graph_add_vertex(graph, "v2", 30.0, 40.0);
     graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
+    graph_add_edge(graph, "v2", "v1", "cepR", "cepL", 25.5, 8.5, "Rua_A_volta");
 
     TEST_ASSERT_TRUE(output_write_svg_with_graph(test_svg_path, geo, graph, NULL, NULL, NULL, NULL));
     TEST_ASSERT_NULL(output_error());
@@ -153,6 +154,7 @@ static void test_writes_svg_road_component_boxes(void) {
     graph_add_vertex(graph, "v1", 10.0, 20.0);
     graph_add_vertex(graph, "v2", 30.0, 40.0);
     graph_add_edge(graph, "v1", "v2", "cepR", "cepL", 25.5, 8.5, "Rua_A");
+    graph_add_edge(graph, "v2", "v1", "cepR", "cepL", 25.5, 8.5, "Rua_A_volta");
     components = road_components_find_slow(graph, 10.0);
     TEST_ASSERT_NOT_NULL(components);
 

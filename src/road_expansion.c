@@ -147,6 +147,9 @@ static CandidateData *collect_candidates(const Graph graph, int *candidate_count
     for (vertex = 0; vertex < graph_vertex_count(graph); vertex++) {
         int edge_index;
         for (edge_index = 0; edge_index < graph_out_degree(graph, vertex); edge_index++) {
+            if (!graph_edge_enabled(graph, vertex, edge_index)) {
+                continue;
+            }
             candidates[count].from = vertex;
             candidates[count].to = graph_edge_to(graph, vertex, edge_index);
             candidates[count].edge_index = edge_index;

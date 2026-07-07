@@ -122,7 +122,7 @@ static int process_regs(Graph graph, RoadComponents *road_components, FILE *txt,
     }
 
     count = road_components_count(new_components);
-    fprintf(txt, "regs %.2f -> %d componentes conexos\n", speed_limit, count);
+    fprintf(txt, "regs %.2f -> %d componentes fortemente conexos\n", speed_limit, count);
 
     if (road_components != NULL) {
         road_components_destroy(*road_components);

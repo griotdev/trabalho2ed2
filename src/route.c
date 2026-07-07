@@ -168,6 +168,9 @@ Route route_shortest_path(const Graph graph, int origin, int destination, int me
             double weight = edge_weight(graph, vertex, edge_index, metric);
             double candidate;
 
+            if (!graph_edge_enabled(graph, vertex, edge_index)) {
+                continue;
+            }
             if (to < 0 || visited[to] || weight == DBL_MAX || distances[vertex] == DBL_MAX) {
                 continue;
             }

@@ -20,6 +20,7 @@ struct EdgeData {
     char *left_cep;
     double length;
     double speed;
+    int enabled;
     char *name;
     EdgeData *next;
 };
@@ -183,6 +184,7 @@ int graph_add_edge(Graph graph,
     edge->to = to;
     edge->length = length;
     edge->speed = speed;
+    edge->enabled = 1;
 
     if (data->vertices[from].last_edge == NULL) {
         data->vertices[from].first_edge = edge;
@@ -339,6 +341,25 @@ int graph_set_edge_speed(Graph graph, int vertex_index, int edge_index, double s
     }
 
     edge->speed = speed;
+    return 1;
+}
+
+int graph_edge_enabled(const Graph graph, int vertex_index, int edge_index) {
+    const GraphData *data = graph;
+    EdgeData *edge = edge_at(data, vertex_index, edge_index);
+
+    return edge == NULL ? 0 : edge->enabled;
+}
+
+int graph_set_edge_enabled(Graph graph, int vertex_index, int edge_index, int enabled) {
+    GraphData *data = graph;
+    EdgeData *edge = edge_at(data, vertex_index, edge_index);
+
+    if (edge == NULL) {
+        return 0;
+    }
+
+    edge->enabled = enabled ? 1 : 0;
     return 1;
 }
 

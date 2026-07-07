@@ -185,7 +185,7 @@ static void write_svg_graph(FILE *file, const Graph graph) {
         for (edge_index = 0; edge_index < graph_out_degree(graph, i); edge_index++) {
             int to = graph_edge_to(graph, i, edge_index);
 
-            if (to >= 0) {
+            if (to >= 0 && graph_edge_enabled(graph, i, edge_index)) {
                 fprintf(file,
                         "  <line x1=\"%.2f\" y1=\"%.2f\" x2=\"%.2f\" y2=\"%.2f\" stroke=\"#777\" stroke-width=\"1.50\">\n",
                         graph_vertex_x(graph, i),
