@@ -93,7 +93,7 @@ static int save_and_filter_edges(Graph graph, double speed_limit, EdgeStateData 
             items[count].enabled = enabled;
             count++;
 
-            if (enabled && graph_edge_speed(graph, vertex, edge_index) >= speed_limit) {
+            if (enabled && graph_edge_speed(graph, vertex, edge_index) < speed_limit) {
                 graph_set_edge_enabled(graph, vertex, edge_index, 0);
             }
         }

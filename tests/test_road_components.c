@@ -18,17 +18,18 @@ static Graph create_components_graph(void) {
     graph_add_vertex(graph, "d", 120.0, 130.0);
     graph_add_vertex(graph, "e", 300.0, 300.0);
 
-    graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 20.0, "Rua_AB");
-    graph_add_edge(graph, "b", "a", "cepR", "cepL", 10.0, 20.0, "Rua_BA");
-    graph_add_edge(graph, "b", "c", "cepR", "cepL", 90.0, 80.0, "Rua_BC");
-    graph_add_edge(graph, "c", "d", "cepR", "cepL", 10.0, 15.0, "Rua_CD");
-    graph_add_edge(graph, "d", "c", "cepR", "cepL", 10.0, 15.0, "Rua_DC");
+    graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 80.0, "Rua_AB");
+    graph_add_edge(graph, "b", "a", "cepR", "cepL", 10.0, 80.0, "Rua_BA");
+    graph_add_edge(graph, "b", "c", "cepR", "cepL", 90.0, 20.0, "Rua_BC");
+    graph_add_edge(graph, "c", "b", "cepR", "cepL", 90.0, 20.0, "Rua_CB");
+    graph_add_edge(graph, "c", "d", "cepR", "cepL", 10.0, 70.0, "Rua_CD");
+    graph_add_edge(graph, "d", "c", "cepR", "cepL", 10.0, 70.0, "Rua_DC");
     graph_add_edge(graph, "e", "a", "cepR", "cepL", 10.0, 100.0, "Rua_EA");
 
     return graph;
 }
 
-static void test_finds_strong_slow_components(void) {
+static void test_finds_strong_components_after_removing_slow_edges(void) {
     Graph graph = create_components_graph();
     RoadComponents components = road_components_find_slow(graph, 30.0);
 
@@ -49,14 +50,14 @@ static void test_finds_strong_slow_components(void) {
     graph_destroy(graph);
 }
 
-static void test_ignores_one_way_slow_connections(void) {
+static void test_ignores_one_way_remaining_connections(void) {
     Graph graph = graph_create();
     RoadComponents components;
 
     TEST_ASSERT_NOT_NULL(graph);
     graph_add_vertex(graph, "a", 0.0, 0.0);
     graph_add_vertex(graph, "b", 10.0, 5.0);
-    graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 20.0, "Rua_AB");
+    graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 80.0, "Rua_AB");
 
     components = road_components_find_slow(graph, 30.0);
 
@@ -82,12 +83,12 @@ static void test_restores_edge_enabled_state_after_search(void) {
     graph_destroy(graph);
 }
 
-static void test_ignores_fast_edges(void) {
+static void test_keeps_all_fast_components_when_no_edges_are_slow(void) {
     Graph graph = create_components_graph();
     RoadComponents components = road_components_find_slow(graph, 10.0);
 
     TEST_ASSERT_NOT_NULL(components);
-    TEST_ASSERT_EQUAL_INT(0, road_components_count(components));
+    TEST_ASSERT_EQUAL_INT(1, road_components_count(components));
 
     road_components_destroy(components);
     graph_destroy(graph);
@@ -105,10 +106,10 @@ static void test_rejects_invalid_inputs(void) {
 
 int main(void) {
     UNITY_BEGIN();
-    RUN_TEST(test_finds_strong_slow_components);
-    RUN_TEST(test_ignores_one_way_slow_connections);
+    RUN_TEST(test_finds_strong_components_after_removing_slow_edges);
+    RUN_TEST(test_ignores_one_way_remaining_connections);
     RUN_TEST(test_restores_edge_enabled_state_after_search);
-    RUN_TEST(test_ignores_fast_edges);
+    RUN_TEST(test_keeps_all_fast_components_when_no_edges_are_slow);
     RUN_TEST(test_rejects_invalid_inputs);
     return UNITY_END();
 }

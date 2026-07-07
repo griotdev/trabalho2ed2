@@ -275,11 +275,12 @@ static Graph create_regs_graph(void) {
     graph_add_vertex(graph, "b", 10.0, 5.0);
     graph_add_vertex(graph, "c", 100.0, 100.0);
     graph_add_vertex(graph, "d", 120.0, 130.0);
-    graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 20.0, "Rua_AB");
-    graph_add_edge(graph, "b", "a", "cepR", "cepL", 10.0, 20.0, "Rua_BA");
-    graph_add_edge(graph, "b", "c", "cepR", "cepL", 10.0, 80.0, "Rua_BC");
-    graph_add_edge(graph, "c", "d", "cepR", "cepL", 10.0, 15.0, "Rua_CD");
-    graph_add_edge(graph, "d", "c", "cepR", "cepL", 10.0, 15.0, "Rua_DC");
+    graph_add_edge(graph, "a", "b", "cepR", "cepL", 10.0, 80.0, "Rua_AB");
+    graph_add_edge(graph, "b", "a", "cepR", "cepL", 10.0, 80.0, "Rua_BA");
+    graph_add_edge(graph, "b", "c", "cepR", "cepL", 10.0, 20.0, "Rua_BC");
+    graph_add_edge(graph, "c", "b", "cepR", "cepL", 10.0, 20.0, "Rua_CB");
+    graph_add_edge(graph, "c", "d", "cepR", "cepL", 10.0, 70.0, "Rua_CD");
+    graph_add_edge(graph, "d", "c", "cepR", "cepL", 10.0, 70.0, "Rua_DC");
 
     return graph;
 }

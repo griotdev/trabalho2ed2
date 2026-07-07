@@ -4,12 +4,12 @@
 #include "graph.h"
 
 /* Resultado de regs: caixas envolventes dos componentes fortemente conexos
- * formados por arestas viarias lentas.
+ * obtidos apos remover temporariamente as arestas viarias lentas.
  */
 typedef void *RoadComponents;
 
-/* Calcula componentes fortemente conexos considerando apenas arestas com
- * velocidade menor que speed_limit. Arestas rapidas sao desabilitadas
+/* Calcula componentes fortemente conexos desabilitando arestas com
+ * velocidade menor que speed_limit. As arestas desabilitadas sao
  * temporariamente e restauradas antes do retorno.
  */
 RoadComponents road_components_find_slow(const Graph graph, double speed_limit);
