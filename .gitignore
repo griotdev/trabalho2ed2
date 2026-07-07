@@ -1,6 +1,9 @@
 bin/*
 obj/*
 out/*
+casos-testes/*
+ted
+ted.exe
 
 !bin/.gitkeep
 !obj/.gitkeep
