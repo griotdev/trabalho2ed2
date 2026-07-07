@@ -1,8 +1,17 @@
 #include "output.h"
 
+#include <float.h>
 #include <stdio.h>
 
 static char last_error[160];
+
+typedef struct {
+    int has_points;
+    double min_x;
+    double min_y;
+    double max_x;
+    double max_y;
+} SvgBounds;
 
 static void clear_error(void) {
     last_error[0] = '\0';
@@ -27,6 +36,123 @@ static int open_output(FILE **file, const char *path) {
     }
 
     return 1;
+}
+
+static void bounds_add_point(SvgBounds *bounds, double x, double y) {
+    if (!bounds->has_points) {
+        bounds->min_x = x;
+        bounds->min_y = y;
+        bounds->max_x = x;
+        bounds->max_y = y;
+        bounds->has_points = 1;
+        return;
+    }
+
+    if (x < bounds->min_x) {
+        bounds->min_x = x;
+    }
+    if (y < bounds->min_y) {
+        bounds->min_y = y;
+    }
+    if (x > bounds->max_x) {
+        bounds->max_x = x;
+    }
+    if (y > bounds->max_y) {
+        bounds->max_y = y;
+    }
+}
+
+static void bounds_add_rect(SvgBounds *bounds, double x, double y, double width, double height) {
+    bounds_add_point(bounds, x, y);
+    bounds_add_point(bounds, x + width, y + height);
+}
+
+static void collect_svg_bounds(SvgBounds *bounds,
+                               const Geo *geo,
+                               const Graph *graph,
+                               const Registers *registers,
+                               const RoadComponents *road_components) {
+    int i;
+
+    bounds->has_points = 0;
+    bounds->min_x = DBL_MAX;
+    bounds->min_y = DBL_MAX;
+    bounds->max_x = -DBL_MAX;
+    bounds->max_y = -DBL_MAX;
+
+    for (i = 0; i < geo_block_count(geo); i++) {
+        const Block *block = geo_block_at(geo, i);
+        bounds_add_rect(bounds,
+                        block_x(block) - block_width(block),
+                        block_y(block),
+                        block_width(block),
+                        block_height(block));
+    }
+
+    if (graph != NULL) {
+        for (i = 0; i < graph_vertex_count(graph); i++) {
+            bounds_add_point(bounds, graph_vertex_x(graph, i), graph_vertex_y(graph, i));
+        }
+    }
+
+    if (registers != NULL) {
+        for (i = 0; i <= 10; i++) {
+            if (registers_is_set(registers, i)) {
+                double x = registers_x(registers, i);
+                double y = registers_y(registers, i);
+
+                bounds_add_point(bounds, x, 0.0);
+                bounds_add_point(bounds, x + 3.0, y);
+            }
+        }
+    }
+
+    if (road_components != NULL) {
+        for (i = 0; i < road_components_count(road_components); i++) {
+            bounds_add_rect(bounds,
+                            road_components_min_x(road_components, i),
+                            road_components_min_y(road_components, i),
+                            road_components_max_x(road_components, i) - road_components_min_x(road_components, i),
+                            road_components_max_y(road_components, i) - road_components_min_y(road_components, i));
+        }
+    }
+}
+
+static void write_svg_header(FILE *file,
+                             const Geo *geo,
+                             const Graph *graph,
+                             const Registers *registers,
+                             const RoadComponents *road_components) {
+    SvgBounds bounds;
+    double padding = 20.0;
+    double x;
+    double y;
+    double width;
+    double height;
+
+    collect_svg_bounds(&bounds, geo, graph, registers, road_components);
+    if (!bounds.has_points) {
+        fputs("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0.00 0.00 100.00 100.00\">\n", file);
+        return;
+    }
+
+    x = bounds.min_x - padding;
+    y = bounds.min_y - padding;
+    width = bounds.max_x - bounds.min_x + 2.0 * padding;
+    height = bounds.max_y - bounds.min_y + 2.0 * padding;
+    if (width <= 0.0) {
+        width = 2.0 * padding;
+    }
+    if (height <= 0.0) {
+        height = 2.0 * padding;
+    }
+
+    fprintf(file,
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"%.2f %.2f %.2f %.2f\">\n",
+            x,
+            y,
+            width,
+            height);
 }
 
 static void write_svg_blocks(FILE *file, const Geo *geo) {
@@ -288,7 +414,7 @@ int output_write_svg_with_graph(const char *path,
         return 0;
     }
 
-    fputs("<svg xmlns=\"http://www.w3.org/2000/svg\">\n", file);
+    write_svg_header(file, geo, graph, registers, road_components);
     write_svg_blocks(file, geo);
     write_svg_graph(file, graph);
     write_svg_road_components(file, road_components);

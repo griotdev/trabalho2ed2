@@ -83,6 +83,7 @@ static void test_writes_svg_rectangles_with_style(void) {
 
     content = read_file(test_svg_path);
     TEST_ASSERT_NOT_NULL(strstr(content, "<svg"));
+    TEST_ASSERT_NOT_NULL(strstr(content, "viewBox=\"-40.00 0.00 70.00 80.00\""));
     TEST_ASSERT_NOT_NULL(strstr(content, "<rect"));
     TEST_ASSERT_NOT_NULL(strstr(content, "fill=\"red\""));
     TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"black\""));
@@ -104,6 +105,7 @@ static void test_writes_svg_register_markers(void) {
     TEST_ASSERT_NULL(output_error());
 
     content = read_file(test_svg_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "viewBox=\"-40.00 -20.00 153.00 240.00\""));
     TEST_ASSERT_NOT_NULL(strstr(content, "<line x1=\"90.00\""));
     TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"red\""));
     TEST_ASSERT_NOT_NULL(strstr(content, "stroke-dasharray=\"4 4\""));
@@ -129,6 +131,7 @@ static void test_writes_svg_graph_edges(void) {
     TEST_ASSERT_NULL(output_error());
 
     content = read_file(test_svg_path);
+    TEST_ASSERT_NOT_NULL(strstr(content, "viewBox=\"-40.00 0.00 90.00 80.00\""));
     TEST_ASSERT_NOT_NULL(strstr(content, "x1=\"10.00\" y1=\"20.00\" x2=\"30.00\" y2=\"40.00\""));
     TEST_ASSERT_NOT_NULL(strstr(content, "stroke=\"#777\""));
     TEST_ASSERT_NOT_NULL(strstr(content, ">Rua_A</title>"));
