@@ -79,13 +79,13 @@ static int read_option_value(AppArgsData *args, int argc, char **argv, int *inde
     return set_value(args, field, option, argv[*index]);
 }
 
-AppArgs *args_create(void) {
+AppArgs args_create(void) {
     AppArgsData *args = calloc(1, sizeof(AppArgsData));
 
     return args;
 }
 
-void args_destroy(AppArgs *args) {
+void args_destroy(AppArgs args) {
     AppArgsData *data = args;
 
     if (args == NULL) {
@@ -96,7 +96,7 @@ void args_destroy(AppArgs *args) {
     free(data);
 }
 
-int args_parse(AppArgs *args, int argc, char **argv) {
+int args_parse(AppArgs args, int argc, char **argv) {
     AppArgsData *data = args;
     int i;
 
@@ -149,37 +149,37 @@ int args_parse(AppArgs *args, int argc, char **argv) {
     return 1;
 }
 
-const char *args_input_dir(const AppArgs *args) {
+const char *args_input_dir(const AppArgs args) {
     const AppArgsData *data = args;
 
     return data == NULL ? NULL : data->input_dir;
 }
 
-const char *args_geo_file(const AppArgs *args) {
+const char *args_geo_file(const AppArgs args) {
     const AppArgsData *data = args;
 
     return data == NULL ? NULL : data->geo_file;
 }
 
-const char *args_query_file(const AppArgs *args) {
+const char *args_query_file(const AppArgs args) {
     const AppArgsData *data = args;
 
     return data == NULL ? NULL : data->query_file;
 }
 
-const char *args_via_file(const AppArgs *args) {
+const char *args_via_file(const AppArgs args) {
     const AppArgsData *data = args;
 
     return data == NULL ? NULL : data->via_file;
 }
 
-const char *args_output_dir(const AppArgs *args) {
+const char *args_output_dir(const AppArgs args) {
     const AppArgsData *data = args;
 
     return data == NULL ? NULL : data->output_dir;
 }
 
-const char *args_error(const AppArgs *args) {
+const char *args_error(const AppArgs args) {
     const AppArgsData *data = args;
 
     if (data == NULL || data->error[0] == '\0') {

@@ -21,8 +21,8 @@ static void write_file(const char *content) {
 }
 
 static void test_loads_vertices_and_edges(void) {
-    Via *via;
-    const Graph *graph;
+    Via via;
+    Graph graph;
     int from;
     int to;
 
@@ -49,7 +49,7 @@ static void test_loads_vertices_and_edges(void) {
 }
 
 static void test_reports_missing_via_file(void) {
-    Via *via = via_load("../out/arquivo_inexistente.via");
+    Via via = via_load("../out/arquivo_inexistente.via");
 
     TEST_ASSERT_NOT_NULL(via);
     TEST_ASSERT_NOT_NULL(via_error(via));
@@ -60,7 +60,7 @@ static void test_reports_missing_via_file(void) {
 }
 
 static void test_reports_edge_with_missing_vertex(void) {
-    Via *via;
+    Via via;
 
     write_file("1\nv v1 10 20\ne v1 v2 cepR cepL 25.5 8.5 Rua_A\n");
     via = via_load(test_via_path);

@@ -69,11 +69,11 @@ static int ensure_capacity(RoadRoutesData *routes) {
     return 1;
 }
 
-RoadRoutes *road_routes_create(void) {
+RoadRoutes road_routes_create(void) {
     return calloc(1, sizeof(RoadRoutesData));
 }
 
-void road_routes_destroy(RoadRoutes *routes) {
+void road_routes_destroy(RoadRoutes routes) {
     RoadRoutesData *data = routes;
     int i;
 
@@ -88,7 +88,7 @@ void road_routes_destroy(RoadRoutes *routes) {
     free(data);
 }
 
-int road_routes_add(RoadRoutes *routes, const Route *route, const char *color, const char *label) {
+int road_routes_add(RoadRoutes routes, const Route route, const char *color, const char *label) {
     RoadRoutesData *data = routes;
     RoadRouteData item;
     int i;
@@ -130,13 +130,13 @@ int road_routes_add(RoadRoutes *routes, const Route *route, const char *color, c
     return 1;
 }
 
-int road_routes_count(const RoadRoutes *routes) {
+int road_routes_count(const RoadRoutes routes) {
     const RoadRoutesData *data = routes;
 
     return data == NULL ? 0 : data->count;
 }
 
-const char *road_routes_color(const RoadRoutes *routes, int index) {
+const char *road_routes_color(const RoadRoutes routes, int index) {
     const RoadRoutesData *data = routes;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -146,7 +146,7 @@ const char *road_routes_color(const RoadRoutes *routes, int index) {
     return data->items[index].color;
 }
 
-const char *road_routes_label(const RoadRoutes *routes, int index) {
+const char *road_routes_label(const RoadRoutes routes, int index) {
     const RoadRoutesData *data = routes;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -156,7 +156,7 @@ const char *road_routes_label(const RoadRoutes *routes, int index) {
     return data->items[index].label;
 }
 
-int road_routes_step_count(const RoadRoutes *routes, int index) {
+int road_routes_step_count(const RoadRoutes routes, int index) {
     const RoadRoutesData *data = routes;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -166,7 +166,7 @@ int road_routes_step_count(const RoadRoutes *routes, int index) {
     return data->items[index].step_count;
 }
 
-static const RoadRouteStepData *step_at(const RoadRoutes *routes, int route_index, int step_index) {
+static const RoadRouteStepData *step_at(const RoadRoutes routes, int route_index, int step_index) {
     const RoadRoutesData *data = routes;
 
     if (data == NULL || route_index < 0 || route_index >= data->count || step_index < 0 ||
@@ -177,19 +177,19 @@ static const RoadRouteStepData *step_at(const RoadRoutes *routes, int route_inde
     return &data->items[route_index].steps[step_index];
 }
 
-int road_routes_step_from(const RoadRoutes *routes, int route_index, int step_index) {
+int road_routes_step_from(const RoadRoutes routes, int route_index, int step_index) {
     const RoadRouteStepData *step = step_at(routes, route_index, step_index);
 
     return step == NULL ? -1 : step->from;
 }
 
-int road_routes_step_to(const RoadRoutes *routes, int route_index, int step_index) {
+int road_routes_step_to(const RoadRoutes routes, int route_index, int step_index) {
     const RoadRouteStepData *step = step_at(routes, route_index, step_index);
 
     return step == NULL ? -1 : step->to;
 }
 
-int road_routes_step_edge_index(const RoadRoutes *routes, int route_index, int step_index) {
+int road_routes_step_edge_index(const RoadRoutes routes, int route_index, int step_index) {
     const RoadRouteStepData *step = step_at(routes, route_index, step_index);
 
     return step == NULL ? -1 : step->edge_index;

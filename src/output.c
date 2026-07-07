@@ -68,10 +68,10 @@ static void bounds_add_rect(SvgBounds *bounds, double x, double y, double width,
 }
 
 static void collect_svg_bounds(SvgBounds *bounds,
-                               const Geo *geo,
-                               const Graph *graph,
-                               const Registers *registers,
-                               const RoadComponents *road_components) {
+                               const Geo geo,
+                               const Graph graph,
+                               const Registers registers,
+                               const RoadComponents road_components) {
     int i;
 
     bounds->has_points = 0;
@@ -81,7 +81,7 @@ static void collect_svg_bounds(SvgBounds *bounds,
     bounds->max_y = -DBL_MAX;
 
     for (i = 0; i < geo_block_count(geo); i++) {
-        const Block *block = geo_block_at(geo, i);
+        const Block block = geo_block_at(geo, i);
         bounds_add_rect(bounds,
                         block_x(block) - block_width(block),
                         block_y(block),
@@ -119,10 +119,10 @@ static void collect_svg_bounds(SvgBounds *bounds,
 }
 
 static void write_svg_header(FILE *file,
-                             const Geo *geo,
-                             const Graph *graph,
-                             const Registers *registers,
-                             const RoadComponents *road_components) {
+                             const Geo geo,
+                             const Graph graph,
+                             const Registers registers,
+                             const RoadComponents road_components) {
     SvgBounds bounds;
     double padding = 20.0;
     double x;
@@ -155,11 +155,11 @@ static void write_svg_header(FILE *file,
             height);
 }
 
-static void write_svg_blocks(FILE *file, const Geo *geo) {
+static void write_svg_blocks(FILE *file, const Geo geo) {
     int i;
 
     for (i = 0; i < geo_block_count(geo); i++) {
-        const Block *block = geo_block_at(geo, i);
+        const Block block = geo_block_at(geo, i);
         fprintf(file,
                 "  <rect x=\"%.2f\" y=\"%.2f\" width=\"%.2f\" height=\"%.2f\" fill=\"%s\" stroke=\"%s\" stroke-width=\"%.2f\" />\n",
                 block_x(block) - block_width(block),
@@ -172,7 +172,7 @@ static void write_svg_blocks(FILE *file, const Geo *geo) {
     }
 }
 
-static void write_svg_graph(FILE *file, const Graph *graph) {
+static void write_svg_graph(FILE *file, const Graph graph) {
     int i;
 
     if (graph == NULL) {
@@ -213,7 +213,7 @@ static const char *component_color(int index) {
     return colors[index % count];
 }
 
-static void write_svg_road_expansion(FILE *file, const Graph *graph, const RoadExpansion *expansion) {
+static void write_svg_road_expansion(FILE *file, const Graph graph, const RoadExpansion expansion) {
     int i;
 
     if (graph == NULL || expansion == NULL) {
@@ -238,7 +238,7 @@ static void write_svg_road_expansion(FILE *file, const Graph *graph, const RoadE
     }
 }
 
-static void write_svg_road_routes(FILE *file, const Graph *graph, const RoadRoutes *routes) {
+static void write_svg_road_routes(FILE *file, const Graph graph, const RoadRoutes routes) {
     int i;
     int markers_written = 0;
 
@@ -313,7 +313,7 @@ static void write_svg_road_routes(FILE *file, const Graph *graph, const RoadRout
         }
     }
 }
-static void write_svg_road_components(FILE *file, const RoadComponents *components) {
+static void write_svg_road_components(FILE *file, const RoadComponents components) {
     int i;
 
     if (components == NULL) {
@@ -339,7 +339,7 @@ static void write_svg_road_components(FILE *file, const RoadComponents *componen
     }
 }
 
-static void write_svg_registers(FILE *file, const Registers *registers) {
+static void write_svg_registers(FILE *file, const Registers registers) {
     int i;
 
     if (registers == NULL) {
@@ -365,7 +365,7 @@ static void write_svg_registers(FILE *file, const Registers *registers) {
     }
 }
 
-int output_write_txt(const char *path, const Geo *geo) {
+int output_write_txt(const char *path, const Geo geo) {
     FILE *file;
     int i;
 
@@ -375,7 +375,7 @@ int output_write_txt(const char *path, const Geo *geo) {
 
     fprintf(file, "Quadras: %d\n", geo_block_count(geo));
     for (i = 0; i < geo_block_count(geo); i++) {
-        const Block *block = geo_block_at(geo, i);
+        const Block block = geo_block_at(geo, i);
         fprintf(file,
                 "q %s %.2f %.2f %.2f %.2f\n",
                 block_cep(block),
@@ -393,21 +393,21 @@ int output_write_txt(const char *path, const Geo *geo) {
     return 1;
 }
 
-int output_write_svg(const char *path, const Geo *geo) {
+int output_write_svg(const char *path, const Geo geo) {
     return output_write_svg_with_graph(path, geo, NULL, NULL, NULL, NULL, NULL);
 }
 
-int output_write_svg_with_registers(const char *path, const Geo *geo, const Registers *registers) {
+int output_write_svg_with_registers(const char *path, const Geo geo, const Registers registers) {
     return output_write_svg_with_graph(path, geo, NULL, registers, NULL, NULL, NULL);
 }
 
 int output_write_svg_with_graph(const char *path,
-                                const Geo *geo,
-                                const Graph *graph,
-                                const Registers *registers,
-                                const RoadComponents *road_components,
-                                const RoadExpansion *road_expansion,
-                                const RoadRoutes *road_routes) {
+                                const Geo geo,
+                                const Graph graph,
+                                const Registers registers,
+                                const RoadComponents road_components,
+                                const RoadExpansion road_expansion,
+                                const RoadRoutes road_routes) {
     FILE *file;
 
     if (!open_output(&file, path)) {

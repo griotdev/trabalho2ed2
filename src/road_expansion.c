@@ -133,7 +133,7 @@ static int union_find_join(UnionFindData *uf, int a, int b) {
     return 1;
 }
 
-static CandidateData *collect_candidates(const Graph *graph, int *candidate_count) {
+static CandidateData *collect_candidates(const Graph graph, int *candidate_count) {
     CandidateData *candidates;
     int count = 0;
     int vertex;
@@ -160,7 +160,7 @@ static CandidateData *collect_candidates(const Graph *graph, int *candidate_coun
     return candidates;
 }
 
-RoadExpansion *road_expansion_apply(Graph *graph, double speed_limit) {
+RoadExpansion road_expansion_apply(Graph graph, double speed_limit) {
     RoadExpansionData *expansion;
     CandidateData *candidates;
     UnionFindData *uf;
@@ -216,7 +216,7 @@ RoadExpansion *road_expansion_apply(Graph *graph, double speed_limit) {
     return expansion;
 }
 
-void road_expansion_destroy(RoadExpansion *expansion) {
+void road_expansion_destroy(RoadExpansion expansion) {
     RoadExpansionData *data = expansion;
 
     if (data == NULL) {
@@ -227,13 +227,13 @@ void road_expansion_destroy(RoadExpansion *expansion) {
     free(data);
 }
 
-int road_expansion_count(const RoadExpansion *expansion) {
+int road_expansion_count(const RoadExpansion expansion) {
     const RoadExpansionData *data = expansion;
 
     return data == NULL ? 0 : data->count;
 }
 
-int road_expansion_edge_from(const RoadExpansion *expansion, int index) {
+int road_expansion_edge_from(const RoadExpansion expansion, int index) {
     const RoadExpansionData *data = expansion;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -243,7 +243,7 @@ int road_expansion_edge_from(const RoadExpansion *expansion, int index) {
     return data->items[index].from;
 }
 
-int road_expansion_edge_to(const RoadExpansion *expansion, int index) {
+int road_expansion_edge_to(const RoadExpansion expansion, int index) {
     const RoadExpansionData *data = expansion;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -253,7 +253,7 @@ int road_expansion_edge_to(const RoadExpansion *expansion, int index) {
     return data->items[index].to;
 }
 
-int road_expansion_edge_index(const RoadExpansion *expansion, int index) {
+int road_expansion_edge_index(const RoadExpansion expansion, int index) {
     const RoadExpansionData *data = expansion;
 
     if (data == NULL || index < 0 || index >= data->count) {

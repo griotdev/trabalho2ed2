@@ -16,14 +16,14 @@ static void print_usage(FILE *stream) {
 }
 
 int main(int argc, char **argv) {
-    AppArgs *args = args_create();
-    FilePaths *paths;
-    Geo *geo;
-    Via *via = NULL;
-    Registers *registers = NULL;
-    RoadComponents *road_components = NULL;
-    RoadExpansion *road_expansion = NULL;
-    RoadRoutes *road_routes = NULL;
+    AppArgs args = args_create();
+    FilePaths paths;
+    Geo geo;
+    Via via = NULL;
+    Registers registers = NULL;
+    RoadComponents road_components = NULL;
+    RoadExpansion road_expansion = NULL;
+    RoadRoutes road_routes = NULL;
 
     if (args == NULL) {
         fputs("Erro: memoria insuficiente\n", stderr);

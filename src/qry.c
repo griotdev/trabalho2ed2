@@ -31,8 +31,8 @@ static int parse_register(const char *text) {
     return (int)value;
 }
 
-static int process_address_query(const Geo *geo, Registers *registers, FILE *txt, const char *line) {
-    const Block *block;
+static int process_address_query(const Geo geo, Registers registers, FILE *txt, const char *line) {
+    Block block;
     char reg_text[16];
     char cep[64];
     char face_text[8];
@@ -72,7 +72,7 @@ static int process_address_query(const Geo *geo, Registers *registers, FILE *txt
     return 1;
 }
 
-static int process_mvm(Graph *graph, FILE *txt, const char *line) {
+static int process_mvm(Graph graph, FILE *txt, const char *line) {
     double speed;
     double x;
     double y;
@@ -100,8 +100,8 @@ static int process_mvm(Graph *graph, FILE *txt, const char *line) {
     return 1;
 }
 
-static int process_regs(Graph *graph, RoadComponents **road_components, FILE *txt, const char *line) {
-    RoadComponents *new_components;
+static int process_regs(Graph graph, RoadComponents *road_components, FILE *txt, const char *line) {
+    RoadComponents new_components;
     double speed_limit;
     int count;
 
@@ -134,8 +134,8 @@ static int process_regs(Graph *graph, RoadComponents **road_components, FILE *tx
     return 1;
 }
 
-static int process_exp(Graph *graph, RoadExpansion **road_expansion, FILE *txt, const char *line) {
-    RoadExpansion *new_expansion;
+static int process_exp(Graph graph, RoadExpansion *road_expansion, FILE *txt, const char *line) {
+    RoadExpansion new_expansion;
     double speed_limit;
     int count;
 
@@ -168,7 +168,7 @@ static int process_exp(Graph *graph, RoadExpansion **road_expansion, FILE *txt, 
     return 1;
 }
 
-static int nearest_registered_vertex(const Graph *graph, const Registers *registers, int reg) {
+static int nearest_registered_vertex(const Graph graph, const Registers registers, int reg) {
     if (!registers_is_set(registers, reg)) {
         return -1;
     }
@@ -176,7 +176,7 @@ static int nearest_registered_vertex(const Graph *graph, const Registers *regist
     return graph_nearest_vertex(graph, registers_x(registers, reg), registers_y(registers, reg));
 }
 
-static void write_route_street_summary(FILE *txt, const Graph *graph, const Route *route) {
+static void write_route_street_summary(FILE *txt, const Graph graph, const Route route) {
     int edge_count = route_edge_count(route);
     int start = 0;
 
@@ -213,7 +213,7 @@ static void write_route_street_summary(FILE *txt, const Graph *graph, const Rout
     }
 }
 
-static void write_route(FILE *txt, const Graph *graph, const char *label, const Route *route) {
+static void write_route(FILE *txt, const Graph graph, const char *label, const Route route) {
     int i;
 
     fprintf(txt, "%s: ", label);
@@ -233,7 +233,7 @@ static void write_route(FILE *txt, const Graph *graph, const char *label, const 
     fputc('\n', txt);
 }
 
-static int process_path_query(Graph *graph, Registers *registers, RoadRoutes *road_routes, FILE *txt, const char *line) {
+static int process_path_query(Graph graph, Registers registers, RoadRoutes road_routes, FILE *txt, const char *line) {
     char origin_text[16];
     char destination_text[16];
     char shortest_color[32];
@@ -242,8 +242,8 @@ static int process_path_query(Graph *graph, Registers *registers, RoadRoutes *ro
     int destination_reg;
     int origin;
     int destination;
-    Route *shortest;
-    Route *fastest;
+    Route shortest;
+    Route fastest;
 
     if (sscanf(line, "p? %15s %15s %31s %31s", origin_text, destination_text, shortest_color, fastest_color) != 4) {
         set_error("Comando p? malformado");
@@ -298,12 +298,12 @@ static int process_path_query(Graph *graph, Registers *registers, RoadRoutes *ro
     return 1;
 }
 
-static int process_line(const Geo *geo,
-                        Graph *graph,
-                        Registers *registers,
-                        RoadComponents **road_components,
-                        RoadExpansion **road_expansion,
-                        RoadRoutes *road_routes,
+static int process_line(const Geo geo,
+                        Graph graph,
+                        Registers registers,
+                        RoadComponents *road_components,
+                        RoadExpansion *road_expansion,
+                        RoadRoutes road_routes,
                         FILE *txt,
                         const char *line) {
     char command[16];
@@ -336,12 +336,12 @@ static int process_line(const Geo *geo,
 }
 
 int qry_process(const char *qry_path,
-                const Geo *geo,
-                Graph *graph,
-                Registers *registers,
-                RoadComponents **road_components,
-                RoadExpansion **road_expansion,
-                RoadRoutes *road_routes,
+                const Geo geo,
+                Graph graph,
+                Registers registers,
+                RoadComponents *road_components,
+                RoadExpansion *road_expansion,
+                RoadRoutes road_routes,
                 const char *txt_path) {
     FILE *qry;
     FILE *txt;

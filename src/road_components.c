@@ -34,7 +34,7 @@ static int ensure_capacity(RoadComponentsData *components) {
     return 1;
 }
 
-static int has_slow_connection(const Graph *graph, int a, int b, double speed_limit) {
+static int has_slow_connection(const Graph graph, int a, int b, double speed_limit) {
     int edge_index;
 
     for (edge_index = 0; edge_index < graph_out_degree(graph, a); edge_index++) {
@@ -52,7 +52,7 @@ static int has_slow_connection(const Graph *graph, int a, int b, double speed_li
     return 0;
 }
 
-static int vertex_has_slow_edge(const Graph *graph, int vertex, double speed_limit) {
+static int vertex_has_slow_edge(const Graph graph, int vertex, double speed_limit) {
     int other;
 
     for (other = 0; other < graph_vertex_count(graph); other++) {
@@ -64,7 +64,7 @@ static int vertex_has_slow_edge(const Graph *graph, int vertex, double speed_lim
     return 0;
 }
 
-static void expand_box(RoadComponentData *component, const Graph *graph, int vertex) {
+static void expand_box(RoadComponentData *component, const Graph graph, int vertex) {
     double x = graph_vertex_x(graph, vertex);
     double y = graph_vertex_y(graph, vertex);
 
@@ -92,7 +92,7 @@ static int append_component(RoadComponentsData *components, RoadComponentData co
     return 1;
 }
 
-static int build_component(const Graph *graph,
+static int build_component(const Graph graph,
                            double speed_limit,
                            int start,
                            int *visited,
@@ -125,7 +125,7 @@ static int build_component(const Graph *graph,
     return append_component(components, component);
 }
 
-RoadComponents *road_components_find_slow(const Graph *graph, double speed_limit) {
+RoadComponents road_components_find_slow(const Graph graph, double speed_limit) {
     RoadComponentsData *components;
     int *visited;
     int *stack;
@@ -170,7 +170,7 @@ RoadComponents *road_components_find_slow(const Graph *graph, double speed_limit
     return components;
 }
 
-void road_components_destroy(RoadComponents *components) {
+void road_components_destroy(RoadComponents components) {
     RoadComponentsData *data = components;
 
     if (data == NULL) {
@@ -181,13 +181,13 @@ void road_components_destroy(RoadComponents *components) {
     free(data);
 }
 
-int road_components_count(const RoadComponents *components) {
+int road_components_count(const RoadComponents components) {
     const RoadComponentsData *data = components;
 
     return data == NULL ? 0 : data->count;
 }
 
-double road_components_min_x(const RoadComponents *components, int index) {
+double road_components_min_x(const RoadComponents components, int index) {
     const RoadComponentsData *data = components;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -197,7 +197,7 @@ double road_components_min_x(const RoadComponents *components, int index) {
     return data->items[index].min_x;
 }
 
-double road_components_min_y(const RoadComponents *components, int index) {
+double road_components_min_y(const RoadComponents components, int index) {
     const RoadComponentsData *data = components;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -207,7 +207,7 @@ double road_components_min_y(const RoadComponents *components, int index) {
     return data->items[index].min_y;
 }
 
-double road_components_max_x(const RoadComponents *components, int index) {
+double road_components_max_x(const RoadComponents components, int index) {
     const RoadComponentsData *data = components;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -217,7 +217,7 @@ double road_components_max_x(const RoadComponents *components, int index) {
     return data->items[index].max_x;
 }
 
-double road_components_max_y(const RoadComponents *components, int index) {
+double road_components_max_y(const RoadComponents components, int index) {
     const RoadComponentsData *data = components;
 
     if (data == NULL || index < 0 || index >= data->count) {

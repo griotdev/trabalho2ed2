@@ -8,8 +8,8 @@ void setUp(void) {
 void tearDown(void) {
 }
 
-static Graph *create_components_graph(void) {
-    Graph *graph = graph_create();
+static Graph create_components_graph(void) {
+    Graph graph = graph_create();
 
     TEST_ASSERT_NOT_NULL(graph);
     graph_add_vertex(graph, "a", 0.0, 0.0);
@@ -27,8 +27,8 @@ static Graph *create_components_graph(void) {
 }
 
 static void test_finds_slow_components_as_undirected(void) {
-    Graph *graph = create_components_graph();
-    RoadComponents *components = road_components_find_slow(graph, 30.0);
+    Graph graph = create_components_graph();
+    RoadComponents components = road_components_find_slow(graph, 30.0);
 
     TEST_ASSERT_NOT_NULL(components);
     TEST_ASSERT_EQUAL_INT(2, road_components_count(components));
@@ -48,8 +48,8 @@ static void test_finds_slow_components_as_undirected(void) {
 }
 
 static void test_ignores_fast_edges(void) {
-    Graph *graph = create_components_graph();
-    RoadComponents *components = road_components_find_slow(graph, 10.0);
+    Graph graph = create_components_graph();
+    RoadComponents components = road_components_find_slow(graph, 10.0);
 
     TEST_ASSERT_NOT_NULL(components);
     TEST_ASSERT_EQUAL_INT(0, road_components_count(components));
@@ -59,7 +59,7 @@ static void test_ignores_fast_edges(void) {
 }
 
 static void test_rejects_invalid_inputs(void) {
-    Graph *graph = graph_create();
+    Graph graph = graph_create();
 
     TEST_ASSERT_NOT_NULL(graph);
     TEST_ASSERT_NULL(road_components_find_slow(NULL, 30.0));

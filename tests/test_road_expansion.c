@@ -8,8 +8,8 @@ void setUp(void) {
 void tearDown(void) {
 }
 
-static Graph *create_expansion_graph(void) {
-    Graph *graph = graph_create();
+static Graph create_expansion_graph(void) {
+    Graph graph = graph_create();
 
     TEST_ASSERT_NOT_NULL(graph);
     graph_add_vertex(graph, "a", 0.0, 0.0);
@@ -26,8 +26,8 @@ static Graph *create_expansion_graph(void) {
 }
 
 static void test_expands_slow_edges_from_minimum_spanning_forest(void) {
-    Graph *graph = create_expansion_graph();
-    RoadExpansion *expansion = road_expansion_apply(graph, 30.0);
+    Graph graph = create_expansion_graph();
+    RoadExpansion expansion = road_expansion_apply(graph, 30.0);
     int a = graph_find_vertex(graph, "a");
     int b = graph_find_vertex(graph, "b");
     int c = graph_find_vertex(graph, "c");
@@ -44,7 +44,7 @@ static void test_expands_slow_edges_from_minimum_spanning_forest(void) {
 }
 
 static void test_rejects_invalid_inputs(void) {
-    Graph *graph = graph_create();
+    Graph graph = graph_create();
 
     TEST_ASSERT_NOT_NULL(graph);
     TEST_ASSERT_NULL(road_expansion_apply(NULL, 30.0));

@@ -8,7 +8,7 @@ void tearDown(void) {
 }
 
 static void test_preserves_block_fields(void) {
-    Block *block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
+    Block block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
 
     TEST_ASSERT_NOT_NULL(block);
     TEST_ASSERT_EQUAL_STRING("cep15", block_cep(block));
@@ -21,7 +21,7 @@ static void test_preserves_block_fields(void) {
 }
 
 static void test_calculates_address_from_southeast_anchor(void) {
-    Block *block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
+    Block block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
     double x = 0.0;
     double y = 0.0;
 
@@ -47,7 +47,7 @@ static void test_calculates_address_from_southeast_anchor(void) {
 }
 
 static void test_rejects_address_number_outside_face(void) {
-    Block *block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
+    Block block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
     double x = 0.0;
     double y = 0.0;
 
@@ -60,7 +60,7 @@ static void test_rejects_address_number_outside_face(void) {
     block_destroy(block);
 }
 static void test_rejects_invalid_face(void) {
-    Block *block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
+    Block block = block_create("cep15", 100.0, 200.0, 40.0, 30.0);
     double x = 0.0;
     double y = 0.0;
 

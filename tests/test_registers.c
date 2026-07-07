@@ -8,7 +8,7 @@ void tearDown(void) {
 }
 
 static void test_stores_and_reads_coordinates(void) {
-    Registers *registers = registers_create();
+    Registers registers = registers_create();
 
     TEST_ASSERT_NOT_NULL(registers);
     TEST_ASSERT_FALSE(registers_is_set(registers, 3));
@@ -21,7 +21,7 @@ static void test_stores_and_reads_coordinates(void) {
 }
 
 static void test_rejects_invalid_index(void) {
-    Registers *registers = registers_create();
+    Registers registers = registers_create();
 
     TEST_ASSERT_NOT_NULL(registers);
     TEST_ASSERT_FALSE(registers_set(registers, -1, 1.0, 2.0));

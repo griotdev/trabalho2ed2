@@ -8,7 +8,7 @@ void tearDown(void) {
 }
 
 static void test_point_preserves_coordinates(void) {
-    Point *point = point_create(12.5, 30.75);
+    Point point = point_create(12.5, 30.75);
 
     TEST_ASSERT_NOT_NULL(point);
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 12.5, point_x(point));
@@ -18,7 +18,7 @@ static void test_point_preserves_coordinates(void) {
 }
 
 static void test_rect_preserves_fields(void) {
-    Rect *rect = rect_create(10.0, 20.0, 30.0, 40.0);
+    Rect rect = rect_create(10.0, 20.0, 30.0, 40.0);
 
     TEST_ASSERT_NOT_NULL(rect);
     TEST_ASSERT_DOUBLE_WITHIN(0.000001, 10.0, rect_x(rect));
@@ -30,7 +30,7 @@ static void test_rect_preserves_fields(void) {
 }
 
 static void test_rect_contains_internal_and_border_points(void) {
-    Rect *rect = rect_create(10.0, 20.0, 30.0, 40.0);
+    Rect rect = rect_create(10.0, 20.0, 30.0, 40.0);
 
     TEST_ASSERT_NOT_NULL(rect);
     TEST_ASSERT_TRUE(rect_contains_point(rect, 25.0, 35.0));
@@ -41,7 +41,7 @@ static void test_rect_contains_internal_and_border_points(void) {
 }
 
 static void test_rect_rejects_external_points(void) {
-    Rect *rect = rect_create(10.0, 20.0, 30.0, 40.0);
+    Rect rect = rect_create(10.0, 20.0, 30.0, 40.0);
 
     TEST_ASSERT_NOT_NULL(rect);
     TEST_ASSERT_FALSE(rect_contains_point(rect, 9.9, 35.0));

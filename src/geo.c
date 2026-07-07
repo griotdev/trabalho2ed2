@@ -6,7 +6,7 @@
 #include <string.h>
 
 typedef struct {
-    Block **blocks;
+    Block *blocks;
     int count;
     int capacity;
     char error[200];
@@ -23,7 +23,7 @@ static void set_error(GeoData *geo, const char *message) {
 }
 
 static int ensure_capacity(GeoData *geo) {
-    Block **new_blocks;
+    Block *new_blocks;
     int new_capacity;
 
     if (geo->count < geo->capacity) {
@@ -31,7 +31,7 @@ static int ensure_capacity(GeoData *geo) {
     }
 
     new_capacity = geo->capacity == 0 ? 8 : geo->capacity * 2;
-    new_blocks = realloc(geo->blocks, (size_t)new_capacity * sizeof(Block *));
+    new_blocks = realloc(geo->blocks, (size_t)new_capacity * sizeof(Block));
     if (new_blocks == NULL) {
         set_error(geo, "Memoria insuficiente ao armazenar quadras");
         return 0;
@@ -42,7 +42,7 @@ static int ensure_capacity(GeoData *geo) {
     return 1;
 }
 
-static int add_block(GeoData *geo, Block *block) {
+static int add_block(GeoData *geo, Block block) {
     if (!ensure_capacity(geo)) {
         return 0;
     }
@@ -78,7 +78,7 @@ static int parse_style(GeoData *geo, GeoStyle *style, const char *line) {
 }
 
 static int parse_block(GeoData *geo, const GeoStyle *style, const char *line) {
-    Block *block;
+    Block block;
     char cep[64];
     double x;
     double y;
@@ -148,7 +148,7 @@ static void read_geo_file(GeoData *geo, const char *path) {
     fclose(file);
 }
 
-Geo *geo_load(const char *path) {
+Geo geo_load(const char *path) {
     GeoData *geo = calloc(1, sizeof(GeoData));
 
     if (geo == NULL) {
@@ -159,7 +159,7 @@ Geo *geo_load(const char *path) {
     return geo;
 }
 
-void geo_destroy(Geo *geo) {
+void geo_destroy(Geo geo) {
     GeoData *data = geo;
     int i;
 
@@ -175,13 +175,13 @@ void geo_destroy(Geo *geo) {
     free(data);
 }
 
-int geo_block_count(const Geo *geo) {
+int geo_block_count(const Geo geo) {
     const GeoData *data = geo;
 
     return data == NULL ? 0 : data->count;
 }
 
-const Block *geo_block_at(const Geo *geo, int index) {
+Block geo_block_at(const Geo geo, int index) {
     const GeoData *data = geo;
 
     if (data == NULL || index < 0 || index >= data->count) {
@@ -191,7 +191,7 @@ const Block *geo_block_at(const Geo *geo, int index) {
     return data->blocks[index];
 }
 
-const Block *geo_find_block(const Geo *geo, const char *cep) {
+Block geo_find_block(const Geo geo, const char *cep) {
     const GeoData *data = geo;
     int i;
 
@@ -208,7 +208,7 @@ const Block *geo_find_block(const Geo *geo, const char *cep) {
     return NULL;
 }
 
-const char *geo_error(const Geo *geo) {
+const char *geo_error(const Geo geo) {
     const GeoData *data = geo;
 
     if (data == NULL || data->error[0] == '\0') {

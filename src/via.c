@@ -5,7 +5,7 @@
 #include <string.h>
 
 typedef struct {
-    Graph *graph;
+    Graph graph;
     char error[200];
 } ViaData;
 
@@ -109,7 +109,7 @@ static void read_via_file(ViaData *via, const char *path) {
     fclose(file);
 }
 
-Via *via_load(const char *path) {
+Via via_load(const char *path) {
     ViaData *via = calloc(1, sizeof(ViaData));
 
     if (via == NULL) {
@@ -126,7 +126,7 @@ Via *via_load(const char *path) {
     return via;
 }
 
-void via_destroy(Via *via) {
+void via_destroy(Via via) {
     ViaData *data = via;
 
     if (data == NULL) {
@@ -137,13 +137,13 @@ void via_destroy(Via *via) {
     free(data);
 }
 
-Graph *via_graph(Via *via) {
+Graph via_graph(Via via) {
     ViaData *data = via;
 
     return data == NULL ? NULL : data->graph;
 }
 
-const char *via_error(const Via *via) {
+const char *via_error(const Via via) {
     const ViaData *data = via;
 
     if (data == NULL || data->error[0] == '\0') {

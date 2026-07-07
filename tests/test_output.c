@@ -50,13 +50,13 @@ static char *read_file(const char *path) {
     return content;
 }
 
-static Geo *load_sample_geo(void) {
+static Geo load_sample_geo(void) {
     write_file(test_geo_path, "cq 2 red black\nq cep1 10 20 30 40\n");
     return geo_load(test_geo_path);
 }
 
 static void test_writes_txt_with_block_summary(void) {
-    Geo *geo = load_sample_geo();
+    Geo geo = load_sample_geo();
     char *content;
 
     TEST_ASSERT_NOT_NULL(geo);
@@ -73,7 +73,7 @@ static void test_writes_txt_with_block_summary(void) {
 }
 
 static void test_writes_svg_rectangles_with_style(void) {
-    Geo *geo = load_sample_geo();
+    Geo geo = load_sample_geo();
     char *content;
 
     TEST_ASSERT_NOT_NULL(geo);
@@ -94,8 +94,8 @@ static void test_writes_svg_rectangles_with_style(void) {
 }
 
 static void test_writes_svg_register_markers(void) {
-    Geo *geo = load_sample_geo();
-    Registers *registers = registers_create();
+    Geo geo = load_sample_geo();
+    Registers registers = registers_create();
     char *content;
 
     TEST_ASSERT_NOT_NULL(geo);
@@ -117,8 +117,8 @@ static void test_writes_svg_register_markers(void) {
 }
 
 static void test_writes_svg_graph_edges(void) {
-    Geo *geo = load_sample_geo();
-    Graph *graph = graph_create();
+    Geo geo = load_sample_geo();
+    Graph graph = graph_create();
     char *content;
 
     TEST_ASSERT_NOT_NULL(geo);
@@ -143,9 +143,9 @@ static void test_writes_svg_graph_edges(void) {
 }
 
 static void test_writes_svg_road_component_boxes(void) {
-    Geo *geo = load_sample_geo();
-    Graph *graph = graph_create();
-    RoadComponents *components;
+    Geo geo = load_sample_geo();
+    Graph graph = graph_create();
+    RoadComponents components;
     char *content;
 
     TEST_ASSERT_NOT_NULL(geo);
@@ -170,9 +170,9 @@ static void test_writes_svg_road_component_boxes(void) {
     geo_destroy(geo);
 }
 static void test_writes_svg_road_expansion(void) {
-    Geo *geo = load_sample_geo();
-    Graph *graph = graph_create();
-    RoadExpansion *expansion;
+    Geo geo = load_sample_geo();
+    Graph graph = graph_create();
+    RoadExpansion expansion;
     char *content;
 
     TEST_ASSERT_NOT_NULL(geo);
@@ -196,10 +196,10 @@ static void test_writes_svg_road_expansion(void) {
     geo_destroy(geo);
 }
 static void test_writes_svg_routes(void) {
-    Geo *geo = load_sample_geo();
-    Graph *graph = graph_create();
-    Route *route;
-    RoadRoutes *routes = road_routes_create();
+    Geo geo = load_sample_geo();
+    Graph graph = graph_create();
+    Route route;
+    RoadRoutes routes = road_routes_create();
     char *content;
 
     TEST_ASSERT_NOT_NULL(geo);

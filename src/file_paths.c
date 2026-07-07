@@ -191,7 +191,7 @@ static int build_paths(FilePathsData *paths,
     return 1;
 }
 
-FilePaths *file_paths_create(const char *input_dir,
+FilePaths file_paths_create(const char *input_dir,
                              const char *geo_file,
                              const char *query_file,
                              const char *via_file,
@@ -206,7 +206,7 @@ FilePaths *file_paths_create(const char *input_dir,
     return paths;
 }
 
-void file_paths_destroy(FilePaths *paths) {
+void file_paths_destroy(FilePaths paths) {
     FilePathsData *data = paths;
 
     if (data == NULL) {
@@ -221,37 +221,37 @@ void file_paths_destroy(FilePaths *paths) {
     free(data);
 }
 
-const char *file_paths_geo_path(const FilePaths *paths) {
+const char *file_paths_geo_path(const FilePaths paths) {
     const FilePathsData *data = paths;
 
     return data == NULL ? NULL : data->geo_path;
 }
 
-const char *file_paths_query_path(const FilePaths *paths) {
+const char *file_paths_query_path(const FilePaths paths) {
     const FilePathsData *data = paths;
 
     return data == NULL ? NULL : data->query_path;
 }
 
-const char *file_paths_via_path(const FilePaths *paths) {
+const char *file_paths_via_path(const FilePaths paths) {
     const FilePathsData *data = paths;
 
     return data == NULL ? NULL : data->via_path;
 }
 
-const char *file_paths_txt_path(const FilePaths *paths) {
+const char *file_paths_txt_path(const FilePaths paths) {
     const FilePathsData *data = paths;
 
     return data == NULL ? NULL : data->txt_path;
 }
 
-const char *file_paths_svg_path(const FilePaths *paths) {
+const char *file_paths_svg_path(const FilePaths paths) {
     const FilePathsData *data = paths;
 
     return data == NULL ? NULL : data->svg_path;
 }
 
-const char *file_paths_error(const FilePaths *paths) {
+const char *file_paths_error(const FilePaths paths) {
     const FilePathsData *data = paths;
 
     if (data == NULL || data->error[0] == '\0') {

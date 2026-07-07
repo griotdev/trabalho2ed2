@@ -33,7 +33,7 @@ static char *copy_string(const char *text) {
     return copy;
 }
 
-Block *block_create(const char *cep, double x, double y, double width, double height) {
+Block block_create(const char *cep, double x, double y, double width, double height) {
     BlockData *block;
 
     if (cep == NULL || width < 0.0 || height < 0.0) {
@@ -65,7 +65,7 @@ Block *block_create(const char *cep, double x, double y, double width, double he
     return block;
 }
 
-void block_destroy(Block *block) {
+void block_destroy(Block block) {
     BlockData *data = block;
 
     if (block == NULL) {
@@ -78,7 +78,7 @@ void block_destroy(Block *block) {
     free(data);
 }
 
-void block_set_style(Block *block, double stroke_width, const char *fill_color, const char *stroke_color) {
+void block_set_style(Block block, double stroke_width, const char *fill_color, const char *stroke_color) {
     BlockData *data = block;
     char *new_fill;
     char *new_stroke;
@@ -102,55 +102,55 @@ void block_set_style(Block *block, double stroke_width, const char *fill_color, 
     data->stroke_color = new_stroke;
 }
 
-const char *block_cep(const Block *block) {
+const char *block_cep(const Block block) {
     const BlockData *data = block;
 
     return data == NULL ? NULL : data->cep;
 }
 
-double block_x(const Block *block) {
+double block_x(const Block block) {
     const BlockData *data = block;
 
     return data == NULL ? 0.0 : data->x;
 }
 
-double block_y(const Block *block) {
+double block_y(const Block block) {
     const BlockData *data = block;
 
     return data == NULL ? 0.0 : data->y;
 }
 
-double block_width(const Block *block) {
+double block_width(const Block block) {
     const BlockData *data = block;
 
     return data == NULL ? 0.0 : data->width;
 }
 
-double block_height(const Block *block) {
+double block_height(const Block block) {
     const BlockData *data = block;
 
     return data == NULL ? 0.0 : data->height;
 }
 
-double block_stroke_width(const Block *block) {
+double block_stroke_width(const Block block) {
     const BlockData *data = block;
 
     return data == NULL ? 0.0 : data->stroke_width;
 }
 
-const char *block_fill_color(const Block *block) {
+const char *block_fill_color(const Block block) {
     const BlockData *data = block;
 
     return data == NULL ? NULL : data->fill_color;
 }
 
-const char *block_stroke_color(const Block *block) {
+const char *block_stroke_color(const Block block) {
     const BlockData *data = block;
 
     return data == NULL ? NULL : data->stroke_color;
 }
 
-int block_address_point(const Block *block, char face, double number, double *x, double *y) {
+int block_address_point(const Block block, char face, double number, double *x, double *y) {
     const BlockData *data = block;
     char normalized_face;
 

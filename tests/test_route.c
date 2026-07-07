@@ -8,8 +8,8 @@ void setUp(void) {
 void tearDown(void) {
 }
 
-static Graph *create_route_graph(void) {
-    Graph *graph = graph_create();
+static Graph create_route_graph(void) {
+    Graph graph = graph_create();
 
     TEST_ASSERT_NOT_NULL(graph);
     graph_add_vertex(graph, "a", 0.0, 0.0);
@@ -26,8 +26,8 @@ static Graph *create_route_graph(void) {
 }
 
 static void test_finds_shortest_by_length(void) {
-    Graph *graph = create_route_graph();
-    Route *route = route_shortest_path(graph, graph_find_vertex(graph, "a"), graph_find_vertex(graph, "d"), ROUTE_METRIC_LENGTH);
+    Graph graph = create_route_graph();
+    Route route = route_shortest_path(graph, graph_find_vertex(graph, "a"), graph_find_vertex(graph, "d"), ROUTE_METRIC_LENGTH);
 
     TEST_ASSERT_NOT_NULL(route);
     TEST_ASSERT_TRUE(route_found(route));
@@ -45,8 +45,8 @@ static void test_finds_shortest_by_length(void) {
 }
 
 static void test_finds_fastest_by_time(void) {
-    Graph *graph = create_route_graph();
-    Route *route = route_shortest_path(graph, graph_find_vertex(graph, "a"), graph_find_vertex(graph, "d"), ROUTE_METRIC_TIME);
+    Graph graph = create_route_graph();
+    Route route = route_shortest_path(graph, graph_find_vertex(graph, "a"), graph_find_vertex(graph, "d"), ROUTE_METRIC_TIME);
 
     TEST_ASSERT_NOT_NULL(route);
     TEST_ASSERT_TRUE(route_found(route));
@@ -63,8 +63,8 @@ static void test_finds_fastest_by_time(void) {
 }
 
 static void test_reports_unreachable_destination(void) {
-    Graph *graph = graph_create();
-    Route *route;
+    Graph graph = graph_create();
+    Route route;
 
     TEST_ASSERT_NOT_NULL(graph);
     graph_add_vertex(graph, "a", 0.0, 0.0);
@@ -81,8 +81,8 @@ static void test_reports_unreachable_destination(void) {
 }
 
 static void test_origin_can_equal_destination(void) {
-    Graph *graph = graph_create();
-    Route *route;
+    Graph graph = graph_create();
+    Route route;
 
     TEST_ASSERT_NOT_NULL(graph);
     graph_add_vertex(graph, "a", 0.0, 0.0);
@@ -100,7 +100,7 @@ static void test_origin_can_equal_destination(void) {
 }
 
 static void test_rejects_invalid_inputs(void) {
-    Graph *graph = create_route_graph();
+    Graph graph = create_route_graph();
 
     TEST_ASSERT_NULL(route_shortest_path(NULL, 0, 1, ROUTE_METRIC_LENGTH));
     TEST_ASSERT_NULL(route_shortest_path(graph, -1, 1, ROUTE_METRIC_LENGTH));

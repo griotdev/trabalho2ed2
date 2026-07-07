@@ -84,13 +84,13 @@ static EdgeData *edge_at(const GraphData *graph, int vertex_index, int edge_inde
     return edge;
 }
 
-Graph *graph_create(void) {
+Graph graph_create(void) {
     GraphData *graph = calloc(1, sizeof(GraphData));
 
     return graph;
 }
 
-void graph_destroy(Graph *graph) {
+void graph_destroy(Graph graph) {
     GraphData *data = graph;
     int i;
 
@@ -117,7 +117,7 @@ void graph_destroy(Graph *graph) {
     free(data);
 }
 
-int graph_add_vertex(Graph *graph, const char *id, double x, double y) {
+int graph_add_vertex(Graph graph, const char *id, double x, double y) {
     GraphData *data = graph;
     VertexData *vertex;
 
@@ -141,7 +141,7 @@ int graph_add_vertex(Graph *graph, const char *id, double x, double y) {
     return data->vertex_count - 1;
 }
 
-int graph_add_edge(Graph *graph,
+int graph_add_edge(Graph graph,
                    const char *from_id,
                    const char *to_id,
                    const char *right_cep,
@@ -195,19 +195,19 @@ int graph_add_edge(Graph *graph,
     return 1;
 }
 
-int graph_vertex_count(const Graph *graph) {
+int graph_vertex_count(const Graph graph) {
     const GraphData *data = graph;
 
     return data == NULL ? 0 : data->vertex_count;
 }
 
-int graph_edge_count(const Graph *graph) {
+int graph_edge_count(const Graph graph) {
     const GraphData *data = graph;
 
     return data == NULL ? 0 : data->edge_count;
 }
 
-int graph_find_vertex(const Graph *graph, const char *id) {
+int graph_find_vertex(const Graph graph, const char *id) {
     const GraphData *data = graph;
     int i;
 
@@ -224,7 +224,7 @@ int graph_find_vertex(const Graph *graph, const char *id) {
     return -1;
 }
 
-int graph_nearest_vertex(const Graph *graph, double x, double y) {
+int graph_nearest_vertex(const Graph graph, double x, double y) {
     const GraphData *data = graph;
     double best_distance = 0.0;
     int best_index = -1;
@@ -248,7 +248,7 @@ int graph_nearest_vertex(const Graph *graph, double x, double y) {
     return best_index;
 }
 
-const char *graph_vertex_id(const Graph *graph, int vertex_index) {
+const char *graph_vertex_id(const Graph graph, int vertex_index) {
     const GraphData *data = graph;
 
     if (data == NULL || vertex_index < 0 || vertex_index >= data->vertex_count) {
@@ -258,7 +258,7 @@ const char *graph_vertex_id(const Graph *graph, int vertex_index) {
     return data->vertices[vertex_index].id;
 }
 
-double graph_vertex_x(const Graph *graph, int vertex_index) {
+double graph_vertex_x(const Graph graph, int vertex_index) {
     const GraphData *data = graph;
 
     if (data == NULL || vertex_index < 0 || vertex_index >= data->vertex_count) {
@@ -268,7 +268,7 @@ double graph_vertex_x(const Graph *graph, int vertex_index) {
     return data->vertices[vertex_index].x;
 }
 
-double graph_vertex_y(const Graph *graph, int vertex_index) {
+double graph_vertex_y(const Graph graph, int vertex_index) {
     const GraphData *data = graph;
 
     if (data == NULL || vertex_index < 0 || vertex_index >= data->vertex_count) {
@@ -278,7 +278,7 @@ double graph_vertex_y(const Graph *graph, int vertex_index) {
     return data->vertices[vertex_index].y;
 }
 
-int graph_out_degree(const Graph *graph, int vertex_index) {
+int graph_out_degree(const Graph graph, int vertex_index) {
     const GraphData *data = graph;
 
     if (data == NULL || vertex_index < 0 || vertex_index >= data->vertex_count) {
@@ -288,49 +288,49 @@ int graph_out_degree(const Graph *graph, int vertex_index) {
     return data->vertices[vertex_index].out_degree;
 }
 
-int graph_edge_to(const Graph *graph, int vertex_index, int edge_index) {
+int graph_edge_to(const Graph graph, int vertex_index, int edge_index) {
     const GraphData *data = graph;
     EdgeData *edge = edge_at(data, vertex_index, edge_index);
 
     return edge == NULL ? -1 : edge->to;
 }
 
-const char *graph_edge_name(const Graph *graph, int vertex_index, int edge_index) {
+const char *graph_edge_name(const Graph graph, int vertex_index, int edge_index) {
     const GraphData *data = graph;
     EdgeData *edge = edge_at(data, vertex_index, edge_index);
 
     return edge == NULL ? NULL : edge->name;
 }
 
-const char *graph_edge_right_cep(const Graph *graph, int vertex_index, int edge_index) {
+const char *graph_edge_right_cep(const Graph graph, int vertex_index, int edge_index) {
     const GraphData *data = graph;
     EdgeData *edge = edge_at(data, vertex_index, edge_index);
 
     return edge == NULL ? NULL : edge->right_cep;
 }
 
-const char *graph_edge_left_cep(const Graph *graph, int vertex_index, int edge_index) {
+const char *graph_edge_left_cep(const Graph graph, int vertex_index, int edge_index) {
     const GraphData *data = graph;
     EdgeData *edge = edge_at(data, vertex_index, edge_index);
 
     return edge == NULL ? NULL : edge->left_cep;
 }
 
-double graph_edge_length(const Graph *graph, int vertex_index, int edge_index) {
+double graph_edge_length(const Graph graph, int vertex_index, int edge_index) {
     const GraphData *data = graph;
     EdgeData *edge = edge_at(data, vertex_index, edge_index);
 
     return edge == NULL ? 0.0 : edge->length;
 }
 
-double graph_edge_speed(const Graph *graph, int vertex_index, int edge_index) {
+double graph_edge_speed(const Graph graph, int vertex_index, int edge_index) {
     const GraphData *data = graph;
     EdgeData *edge = edge_at(data, vertex_index, edge_index);
 
     return edge == NULL ? 0.0 : edge->speed;
 }
 
-int graph_set_edge_speed(Graph *graph, int vertex_index, int edge_index, double speed) {
+int graph_set_edge_speed(Graph graph, int vertex_index, int edge_index, double speed) {
     GraphData *data = graph;
     EdgeData *edge = edge_at(data, vertex_index, edge_index);
 
@@ -346,7 +346,7 @@ static int graph_point_inside_rect(double px, double py, double x, double y, dou
     return px >= x && px <= x + width && py >= y && py <= y + height;
 }
 
-int graph_update_speeds_in_rect(Graph *graph, double speed, double x, double y, double width, double height) {
+int graph_update_speeds_in_rect(Graph graph, double speed, double x, double y, double width, double height) {
     GraphData *data = graph;
     int updated = 0;
     int i;

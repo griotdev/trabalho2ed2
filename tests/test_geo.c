@@ -21,9 +21,9 @@ static void write_file(const char *content) {
 }
 
 static void test_loads_blocks_from_geo(void) {
-    Geo *geo;
-    const Block *first;
-    const Block *second;
+    Geo geo;
+    Block first;
+    Block second;
 
     write_file("q cep1 10 20 30 40\nq cep2 50 60 70 80\n");
     geo = geo_load(test_geo_path);
@@ -44,9 +44,9 @@ static void test_loads_blocks_from_geo(void) {
 }
 
 static void test_applies_cq_style_to_following_blocks(void) {
-    Geo *geo;
-    const Block *first;
-    const Block *second;
+    Geo geo;
+    Block first;
+    Block second;
 
     write_file("cq 2.5px red black\nq cep1 10 20 30 40\ncq 1 blue gray\nq cep2 50 60 70 80\n");
     geo = geo_load(test_geo_path);
@@ -69,7 +69,7 @@ static void test_applies_cq_style_to_following_blocks(void) {
 }
 
 static void test_reports_missing_file(void) {
-    Geo *geo = geo_load("../out/arquivo_inexistente.geo");
+    Geo geo = geo_load("../out/arquivo_inexistente.geo");
 
     TEST_ASSERT_NOT_NULL(geo);
     TEST_ASSERT_NOT_NULL(geo_error(geo));

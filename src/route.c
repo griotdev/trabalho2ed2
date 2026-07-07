@@ -29,7 +29,7 @@ static RouteData *route_create_empty(int found) {
     return route;
 }
 
-static double edge_weight(const Graph *graph, int vertex, int edge_index, int metric) {
+static double edge_weight(const Graph graph, int vertex, int edge_index, int metric) {
     double length = graph_edge_length(graph, vertex, edge_index);
     double speed;
 
@@ -114,7 +114,7 @@ static RouteData *build_route(int origin,
     return route;
 }
 
-Route *route_shortest_path(const Graph *graph, int origin, int destination, int metric) {
+Route route_shortest_path(const Graph graph, int origin, int destination, int metric) {
     double *distances;
     int *previous_vertex;
     int *previous_edge;
@@ -194,7 +194,7 @@ Route *route_shortest_path(const Graph *graph, int origin, int destination, int 
     return route;
 }
 
-void route_destroy(Route *route) {
+void route_destroy(Route route) {
     RouteData *data = route;
 
     if (data == NULL) {
@@ -206,25 +206,25 @@ void route_destroy(Route *route) {
     free(data);
 }
 
-int route_found(const Route *route) {
+int route_found(const Route route) {
     const RouteData *data = route;
 
     return data == NULL ? 0 : data->found;
 }
 
-double route_total_weight(const Route *route) {
+double route_total_weight(const Route route) {
     const RouteData *data = route;
 
     return data == NULL ? 0.0 : data->total_weight;
 }
 
-int route_vertex_count(const Route *route) {
+int route_vertex_count(const Route route) {
     const RouteData *data = route;
 
     return data == NULL ? 0 : data->vertex_count;
 }
 
-int route_vertex_at(const Route *route, int index) {
+int route_vertex_at(const Route route, int index) {
     const RouteData *data = route;
 
     if (data == NULL || index < 0 || index >= data->vertex_count) {
@@ -234,13 +234,13 @@ int route_vertex_at(const Route *route, int index) {
     return data->vertices[index];
 }
 
-int route_edge_count(const Route *route) {
+int route_edge_count(const Route route) {
     const RouteData *data = route;
 
     return data == NULL ? 0 : data->step_count;
 }
 
-int route_edge_from(const Route *route, int index) {
+int route_edge_from(const Route route, int index) {
     const RouteData *data = route;
 
     if (data == NULL || index < 0 || index >= data->step_count) {
@@ -250,7 +250,7 @@ int route_edge_from(const Route *route, int index) {
     return data->steps[index].from;
 }
 
-int route_edge_to(const Route *route, int index) {
+int route_edge_to(const Route route, int index) {
     const RouteData *data = route;
 
     if (data == NULL || index < 0 || index >= data->step_count) {
@@ -260,7 +260,7 @@ int route_edge_to(const Route *route, int index) {
     return data->steps[index].to;
 }
 
-int route_edge_index(const Route *route, int index) {
+int route_edge_index(const Route route, int index) {
     const RouteData *data = route;
 
     if (data == NULL || index < 0 || index >= data->step_count) {

@@ -52,8 +52,8 @@ static char *read_file(const char *path) {
 }
 
 static void test_processes_address_query(void) {
-    Geo *geo;
-    Registers *registers;
+    Geo geo;
+    Registers registers;
     char *content;
 
     write_file(test_geo_path, "q cep1 100 200 40 30\n");
@@ -81,8 +81,8 @@ static void test_processes_address_query(void) {
 }
 
 static void test_reports_missing_cep(void) {
-    Geo *geo;
-    Registers *registers;
+    Geo geo;
+    Registers registers;
 
     write_file(test_geo_path, "q cep1 100 200 40 30\n");
     write_file(test_qry_path, "@o? R2 cepX S 10\n");
@@ -102,9 +102,9 @@ static void test_reports_missing_cep(void) {
 }
 
 static void test_processes_mvm_query(void) {
-    Geo *geo;
-    Graph *graph;
-    Registers *registers;
+    Geo geo;
+    Graph graph;
+    Registers registers;
     char *content;
     int from;
 
@@ -142,8 +142,8 @@ static void test_processes_mvm_query(void) {
 }
 
 static void test_reports_mvm_without_graph(void) {
-    Geo *geo;
-    Registers *registers;
+    Geo geo;
+    Registers registers;
 
     write_file(test_geo_path, "q cep1 100 200 40 30\n");
     write_file(test_qry_path, "mvm 12 0 0 30 30\n");
@@ -161,8 +161,8 @@ static void test_reports_mvm_without_graph(void) {
     geo_destroy(geo);
 }
 
-static Graph *create_path_graph(void) {
-    Graph *graph = graph_create();
+static Graph create_path_graph(void) {
+    Graph graph = graph_create();
 
     TEST_ASSERT_NOT_NULL(graph);
     graph_add_vertex(graph, "a", 0.0, 0.0);
@@ -178,10 +178,10 @@ static Graph *create_path_graph(void) {
 }
 
 static void test_processes_path_query(void) {
-    Geo *geo;
-    Graph *graph;
-    Registers *registers;
-    RoadRoutes *routes;
+    Geo geo;
+    Graph graph;
+    Registers registers;
+    RoadRoutes routes;
     char *content;
 
     write_file(test_geo_path, "q cep1 100 200 40 30\n");
@@ -219,10 +219,10 @@ static void test_processes_path_query(void) {
 }
 
 static void test_processes_unreachable_path_query(void) {
-    Geo *geo;
-    Graph *graph;
-    Registers *registers;
-    RoadRoutes *routes;
+    Geo geo;
+    Graph graph;
+    Registers registers;
+    RoadRoutes routes;
     char *content;
 
     write_file(test_geo_path, "q cep1 100 200 40 30\n");
@@ -257,8 +257,8 @@ static void test_processes_unreachable_path_query(void) {
     graph_destroy(graph);
     geo_destroy(geo);
 }
-static Graph *create_regs_graph(void) {
-    Graph *graph = graph_create();
+static Graph create_regs_graph(void) {
+    Graph graph = graph_create();
 
     TEST_ASSERT_NOT_NULL(graph);
     graph_add_vertex(graph, "a", 0.0, 0.0);
@@ -273,10 +273,10 @@ static Graph *create_regs_graph(void) {
 }
 
 static void test_processes_regs_query(void) {
-    Geo *geo;
-    Graph *graph;
-    Registers *registers;
-    RoadComponents *components = NULL;
+    Geo geo;
+    Graph graph;
+    Registers registers;
+    RoadComponents components = NULL;
     char *content;
 
     write_file(test_geo_path, "q cep1 100 200 40 30\n");
@@ -307,10 +307,10 @@ static void test_processes_regs_query(void) {
 }
 
 static void test_processes_exp_query(void) {
-    Geo *geo;
-    Graph *graph;
-    Registers *registers;
-    RoadExpansion *expansion = NULL;
+    Geo geo;
+    Graph graph;
+    Registers registers;
+    RoadExpansion expansion = NULL;
     char *content;
     int a;
     int b;
