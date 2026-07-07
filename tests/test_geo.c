@@ -48,7 +48,7 @@ static void test_applies_cq_style_to_following_blocks(void) {
     const Block *first;
     const Block *second;
 
-    write_file("cq 2.5 red black\nq cep1 10 20 30 40\ncq 1 blue gray\nq cep2 50 60 70 80\n");
+    write_file("cq 2.5px red black\nq cep1 10 20 30 40\ncq 1 blue gray\nq cep2 50 60 70 80\n");
     geo = geo_load(test_geo_path);
 
     TEST_ASSERT_NOT_NULL(geo);

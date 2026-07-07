@@ -1,6 +1,7 @@
 #include "geo.h"
 
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -52,12 +53,21 @@ static int add_block(GeoData *geo, Block *block) {
 }
 
 static int parse_style(GeoData *geo, GeoStyle *style, const char *line) {
-    double stroke_width;
+    char stroke_width_text[64];
     char fill_color[64];
     char stroke_color[64];
+    char *end;
+    double stroke_width;
 
-    if (sscanf(line, "cq %lf %63s %63s", &stroke_width, fill_color, stroke_color) != 3) {
+    if (sscanf(line, "cq %63s %63s %63s", stroke_width_text, fill_color, stroke_color) != 3) {
         set_error(geo, "Comando cq malformado");
+        return 0;
+    }
+
+    errno = 0;
+    stroke_width = strtod(stroke_width_text, &end);
+    if (errno != 0 || end == stroke_width_text || (*end != '\0' && strcmp(end, "px") != 0) || stroke_width < 0.0) {
+        set_error(geo, "Espessura de cq invalida");
         return 0;
     }
 
