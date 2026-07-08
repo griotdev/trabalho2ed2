@@ -8,8 +8,17 @@
 #include "road_expansion.h"
 #include "road_routes.h"
 
+/* Modulo de processamento do arquivo QRY.
+ *
+ * Executa os comandos na ordem do arquivo, atualizando o estado do grafo e
+ * acumulando os resultados necessarios para TXT e SVG.
+ */
+
 /* Processa comandos QRY e acrescenta as respostas no TXT.
- * road_components e road_expansion sao parametros de saida opcionais.
+ * road_components e road_expansion sao parametros de saida: quando novas
+ * consultas regs/exp aparecem, os resultados ficam disponiveis para o SVG.
+ * road_routes acumula os percursos dos comandos p?.
+ * Retorna 1 em sucesso e 0 em erro; consulte qry_error.
  */
 int qry_process(const char *qry_path,
                 const Geo geo,

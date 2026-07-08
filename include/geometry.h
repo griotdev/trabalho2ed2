@@ -2,20 +2,32 @@
 #define GEOMETRY_H
 
 /* Primitivas geometricas simples usadas pelos modulos de dominio.
- * Tipos opacos para manter campos internos fora dos headers.
+ *
+ * Point e Rect sao tipos opacos. Os campos numericos ficam restritos a
+ * geometry.c para manter a interface publica baseada em void pointers.
  */
 typedef void *Point;
 typedef void *Rect;
 
-/* Ponto 2D. */
+/* Cria um ponto 2D. Retorna NULL em erro de memoria. */
 Point point_create(double x, double y);
+
+/* Libera um ponto. Aceita NULL. */
 void point_destroy(Point point);
+
+/* Acessores das coordenadas do ponto; retornam 0.0 para ponteiro NULL. */
 double point_x(const Point point);
 double point_y(const Point point);
 
-/* Retangulo axis-aligned. Retorna NULL se largura/altura forem negativas. */
+/* Cria um retangulo alinhado aos eixos.
+ * width e height devem ser nao negativos. Retorna NULL em erro.
+ */
 Rect rect_create(double x, double y, double width, double height);
+
+/* Libera um retangulo. Aceita NULL. */
 void rect_destroy(Rect rect);
+
+/* Acessores dos campos do retangulo; retornam 0.0 para ponteiro NULL. */
 double rect_x(const Rect rect);
 double rect_y(const Rect rect);
 double rect_width(const Rect rect);
