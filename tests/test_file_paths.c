@@ -29,6 +29,8 @@ static void test_joins_input_dir_to_relative_input_files(void) {
     TEST_ASSERT_EQUAL_STRING("entrada/cidade.geo", file_paths_geo_path(paths));
     TEST_ASSERT_EQUAL_STRING("entrada/consulta.qry", file_paths_query_path(paths));
     TEST_ASSERT_EQUAL_STRING("entrada/vias.via", file_paths_via_path(paths));
+    TEST_ASSERT_EQUAL_STRING("saida/cidade-consulta.txt", file_paths_txt_path(paths));
+    TEST_ASSERT_EQUAL_STRING("saida/cidade-consulta.svg", file_paths_svg_path(paths));
 
     file_paths_destroy(paths);
 }
@@ -55,6 +57,17 @@ static void test_uses_geo_basename_for_outputs(void) {
     file_paths_destroy(paths);
 }
 
+static void test_combines_geo_and_query_basenames_for_outputs(void) {
+    FilePaths paths = file_paths_create(NULL, "mapas/cidade.central.geo", "consultas/rota.01.qry", NULL, "saida");
+
+    TEST_ASSERT_NOT_NULL(paths);
+    TEST_ASSERT_NULL(file_paths_error(paths));
+    TEST_ASSERT_EQUAL_STRING("saida/cidade.central-rota.01.txt", file_paths_txt_path(paths));
+    TEST_ASSERT_EQUAL_STRING("saida/cidade.central-rota.01.svg", file_paths_svg_path(paths));
+
+    file_paths_destroy(paths);
+}
+
 static void test_rejects_missing_required_paths(void) {
     FilePaths missing_geo = file_paths_create(NULL, NULL, NULL, NULL, "saida");
     FilePaths missing_output = file_paths_create(NULL, "cidade.geo", NULL, NULL, NULL);
@@ -74,6 +87,7 @@ int main(void) {
     RUN_TEST(test_joins_input_dir_to_relative_input_files);
     RUN_TEST(test_preserves_absolute_input_files);
     RUN_TEST(test_uses_geo_basename_for_outputs);
+    RUN_TEST(test_combines_geo_and_query_basenames_for_outputs);
     RUN_TEST(test_rejects_missing_required_paths);
     return UNITY_END();
 }

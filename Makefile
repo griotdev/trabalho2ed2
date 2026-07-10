@@ -26,11 +26,11 @@ MKDIR_P = mkdir -p $@
 TEST_RUNNER = cd $(SRC_DIR) && ../$(BIN_DIR)/test_$1
 endif
 
-.PHONY: all test clean
+.PHONY: all ted test clean
 
-all: $(TARGET)
+all: ted
 
-$(TARGET): $(APP_OBJECTS) | $(BIN_DIR)
+ted: $(APP_OBJECTS) | $(BIN_DIR)
 	$(CC) $(CFLAGS) $(APP_OBJECTS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)

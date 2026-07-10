@@ -124,6 +124,28 @@ static char *base_name_without_extension(const char *path) {
     return base;
 }
 
+static char *join_base_names(const char *geo_base_name, const char *query_base_name) {
+    char *base_name;
+    size_t geo_length;
+    size_t query_length;
+
+    if (query_base_name == NULL || query_base_name[0] == '\0') {
+        return copy_string(geo_base_name);
+    }
+
+    geo_length = strlen(geo_base_name);
+    query_length = strlen(query_base_name);
+    base_name = malloc(geo_length + 1U + query_length + 1U);
+    if (base_name == NULL) {
+        return NULL;
+    }
+
+    memcpy(base_name, geo_base_name, geo_length);
+    base_name[geo_length] = '-';
+    memcpy(base_name + geo_length + 1U, query_base_name, query_length + 1U);
+    return base_name;
+}
+
 static char *output_path(const char *output_dir, const char *base_name, const char *extension) {
     char *file_name;
     char *path;
@@ -156,7 +178,9 @@ static int build_paths(FilePathsData *paths,
                        const char *query_file,
                        const char *via_file,
                        const char *output_dir) {
-    char *base_name;
+    char *geo_base_name;
+    char *query_base_name = NULL;
+    char *output_base_name;
 
     if (geo_file == NULL || geo_file[0] == '\0') {
         set_error(paths, "Arquivo GEO nao informado");
@@ -171,17 +195,31 @@ static int build_paths(FilePathsData *paths,
     paths->geo_path = join_path(input_dir, geo_file);
     paths->query_path = join_path(input_dir, query_file);
     paths->via_path = join_path(input_dir, via_file);
-    base_name = base_name_without_extension(geo_file);
+    geo_base_name = base_name_without_extension(geo_file);
+    if (query_file != NULL && query_file[0] != '\0') {
+        query_base_name = base_name_without_extension(query_file);
+    }
 
-    if (paths->geo_path == NULL || base_name == NULL) {
-        free(base_name);
+    if (paths->geo_path == NULL ||
+        geo_base_name == NULL ||
+        (query_file != NULL && query_file[0] != '\0' && query_base_name == NULL)) {
+        free(geo_base_name);
+        free(query_base_name);
         set_error(paths, "Memoria insuficiente ao montar caminhos");
         return 0;
     }
 
-    paths->txt_path = output_path(output_dir, base_name, ".txt");
-    paths->svg_path = output_path(output_dir, base_name, ".svg");
-    free(base_name);
+    output_base_name = join_base_names(geo_base_name, query_base_name);
+    free(geo_base_name);
+    free(query_base_name);
+    if (output_base_name == NULL) {
+        set_error(paths, "Memoria insuficiente ao montar saidas");
+        return 0;
+    }
+
+    paths->txt_path = output_path(output_dir, output_base_name, ".txt");
+    paths->svg_path = output_path(output_dir, output_base_name, ".svg");
+    free(output_base_name);
 
     if (paths->txt_path == NULL || paths->svg_path == NULL) {
         set_error(paths, "Memoria insuficiente ao montar saidas");

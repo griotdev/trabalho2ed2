@@ -4,8 +4,9 @@
 /* Modulo de montagem de caminhos de entrada e saida.
  *
  * FilePaths e opaco. Ele guarda as strings finais para GEO, QRY, VIA, TXT e
- * SVG, usando '/' ao concatenar diretorios relativos para manter
- * compatibilidade com ambientes Linux.
+ * SVG. Quando ha QRY, as saidas usam o formato nomegeo-nomeqry.txt/.svg.
+ * A concatenacao de diretorios relativos usa '/' para manter compatibilidade
+ * com ambientes Linux.
  */
 typedef void *FilePaths;
 
