@@ -7,7 +7,7 @@ TEST_DIR := tests
 OBJ_DIR := obj
 BIN_DIR := bin
 
-TARGET := ted
+TARGET := $(SRC_DIR)/ted
 
 MODULE_SOURCES := $(filter-out $(SRC_DIR)/main.c,$(wildcard $(SRC_DIR)/*.c))
 APP_SOURCES := $(wildcard $(SRC_DIR)/*.c)
@@ -30,7 +30,9 @@ endif
 
 all: ted
 
-ted: $(APP_OBJECTS) | $(BIN_DIR)
+ted: $(TARGET)
+
+$(TARGET): $(APP_OBJECTS) | $(BIN_DIR)
 	$(CC) $(CFLAGS) $(APP_OBJECTS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
@@ -67,11 +69,14 @@ clean:
 ifeq ($(OS),Windows_NT)
 	-del /Q $(subst /,\,$(OBJ_DIR))\*.o 2>NUL
 	-del /Q $(subst /,\,$(TARGET)) 2>NUL
+	-del /Q $(subst /,\,$(TARGET)).exe 2>NUL
+	-del /Q ted 2>NUL
 	-del /Q ted.exe 2>NUL
 	-del /Q $(subst /,\,$(BIN_DIR))\test_* 2>NUL
 else
 	rm -f $(OBJ_DIR)/*.o
 	rm -f $(TARGET)
+	rm -f ted
 	rm -f ted.exe
 	rm -f $(TEST_TARGETS)
 endif
